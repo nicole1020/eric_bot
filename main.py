@@ -131,9 +131,19 @@ import os
 import gensim
 # Set file names for train and test data
 test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
-csv_train_file = os.path.join(test_data_dir, 'lee_background.cor')
-csv_test_file = os.path.join(test_data_dir, 'complaints_processed.csv')
+csv_train_file = os.path.join(test_data_dir, 'complaints_processed.csv')
+csv_test_file = os.path.join(test_data_dir, 'lee.cor')
 
+
+from imblearn.over_sampling import SMOTE1
+x_smote, y_smote = SMOTE().fit_resample(X, df['product'][:5000])
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test=train_test_split(x_smote,y_smote,test_size=0.20,random_state=42)
+from sklearn.naive_bayes import MultinomialNB
+
+nb = MultinomialNB()
+nb.fit(X_train, y_train)
+nb.predict(X_test)
 ###############################################################################
 # Define a Function to Read and Preprocess Text
 # ---------------------------------------------
@@ -232,7 +242,9 @@ model.train(train_corpus, total_examples=model.corpus_count, epochs=model.epochs
 # by passing a list of words to the ``model.infer_vector`` function. This
 # vector can then be compared with other vectors via cosine similarity.
 #
-vector = model.infer_vector(['only', 'you', 'can', 'prevent', 'forest', 'fires'])
+list_of_terms = ['jewelry', 'pearls', 'necklace', 'earrings', 'gemstone']
+vector = model.infer_vector(list_of_terms)
+print(list_of_terms)
 print(vector)
 
 ###############################################################################
