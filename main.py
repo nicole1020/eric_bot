@@ -8,6 +8,7 @@ Introduces Gensim's Doc2Vec model and demonstrates its use on the
 """
 
 import logging
+
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 ###############################################################################
@@ -129,21 +130,43 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 import os
 import gensim
+import numpy as np
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
+
 # Set file names for train and test data
 test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
 csv_train_file = os.path.join(test_data_dir, 'complaints_processed.csv')
 csv_test_file = os.path.join(test_data_dir, 'lee.cor')
 
+# needed to ignore first column (importing duplicate first col)
+# https://www.statology.org/pandas-read-csv-ignore-first-column/
+with open(csv_train_file) as x:
+    cols = len(x.readline().split(','))
 
-from imblearn.over_sampling import SMOTE1
-x_smote, y_smote = SMOTE().fit_resample(X, df['product'][:5000])
-from sklearn.model_selection import train_test_split
-X_train,X_test,y_train,y_test=train_test_split(x_smote,y_smote,test_size=0.20,random_state=42)
+df = pd.read_csv(csv_train_file, usecols=range(1, cols))
+
+print(df)
+print(df['product'].value_counts())
+
+X_train, X_test, y_train, y_test = train_test_split(df['product'], df['narrative'], test_size=0.25, random_state=1111)
+
+vectorize = TfidfVectorizer()
+
+X_train_vec = vectorize.fit_transform(X_train)
+X_test_vec = vectorize.transform(X_test)
+
 from sklearn.naive_bayes import MultinomialNB
+mnb = MultinomialNB()
+mnb.fit(X_train_vec, y_train)
 
-nb = MultinomialNB()
-nb.fit(X_train, y_train)
-nb.predict(X_test)
+
+mnb.predict(X_test)
+y_pred = mnb.predict(X_test_vec)
+confusion_matrix(y_test, y_pred)
 ###############################################################################
 # Define a Function to Read and Preprocess Text
 # ---------------------------------------------
@@ -164,6 +187,7 @@ nb.predict(X_test)
 #
 import smart_open
 
+
 def read_corpus(fname, tokens_only=False):
     with smart_open.open(fname, encoding="iso-8859-1") as f:
         for i, line in enumerate(f):
@@ -173,6 +197,7 @@ def read_corpus(fname, tokens_only=False):
             else:
                 # For training data, add tags
                 yield gensim.models.doc2vec.TaggedDocument(tokens, [i])
+
 
 train_corpus = list(read_corpus(csv_train_file))
 test_corpus = list(read_corpus(csv_test_file, tokens_only=True))
@@ -301,7 +326,7 @@ print(counter)
 #
 print('Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].words)))
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
-for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims)//2), ('LEAST', len(sims) - 1)]:
+for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
 ###############################################################################
@@ -317,6 +342,7 @@ for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims)//2), 
 
 # Pick a random document from the corpus and infer a vector from the model
 import random
+
 doc_id = random.randint(0, len(train_corpus) - 1)
 
 # Compare and print the second-most-similar document
@@ -340,7 +366,7 @@ sims = model.dv.most_similar([inferred_vector], topn=len(model.dv))
 # Compare and print the most/median/least similar documents from the train corpus
 print('Test Document ({}): «{}»\n'.format(doc_id, ' '.join(test_corpus[doc_id])))
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
-for label, index in [('MOST', 0), ('MEDIAN', len(sims)//2), ('LEAST', len(sims) - 1)]:
+for label, index in [('MOST', 0), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
 ###############################################################################
