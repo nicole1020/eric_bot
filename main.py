@@ -8,6 +8,7 @@ Introduces Gensim's Doc2Vec model and demonstrates its use on the
 """
 import csv
 import logging
+import pickle
 
 from imblearn.over_sampling import SMOTE
 
@@ -150,6 +151,7 @@ csv_train_file = os.path.join(test_data_dir, 'complaints_processed.csv')
 csv_test_file = os.path.join(test_data_dir, 'emails from Seattle Jewelry Company.csv')
 csv_tmp_file = os.path.join(test_data_dir, 'data_part_.csv')
 
+pickle_save = os.path.join(test_data_dir, 'eric_model.sav')
 # issue with values
 # https://www.youtube.com/watch?v=OS2m0f2gVJ0
 missing_narrative = ['N/a', "Nan", "NaN", np.nan, "na", "Na", None]
@@ -322,7 +324,7 @@ model.build_vocab(train_corpus)
 # Additional attributes for each word are available using the ``model.wv.get_vecattr()`` method,
 # For example, to see how many times ``penalty`` appeared in the training corpus:
 #
-print(f"Word 'penalty' appeared {model.wv.get_vecattr('penalty', 'count')} times in the training corpus.")
+print(f"Word 'jewelry' appeared {model.wv.get_vecattr('jewelry', 'count')} times in train corpus.")
 
 ###############################################################################
 # Next, train the model on the corpus.
@@ -344,9 +346,12 @@ model.train(train_corpus, total_examples=model.corpus_count, epochs=model.epochs
 # vector can then be compared with other vectors via cosine similarity.
 #
 list_of_terms = ['jewelry', 'pearls', 'necklace', 'earrings', 'gemstone']
+#introductory- will expand terms in real life data with 'order status', 'exchange', 'return', 'refund'
 vector = model.infer_vector(list_of_terms)
 print(list_of_terms)
 print(vector)
+
+pickle.dump(model, open(pickle_save, 'wb'))
 
 ###############################################################################
 # Note that ``infer_vector()`` does *not* take a string, but rather a list of
@@ -391,32 +396,7 @@ import collections
 counter = collections.Counter(ranks)
 print(counter)
 
-###############################################################################
-# Basically, greater than 95% of the inferred documents are found to be most
-# similar to itself and about 5% of the time it is mistakenly most similar to
-# another document. Checking the inferred-vector against a
-# training-vector is a sort of 'sanity check' as to whether the model is
-# behaving in a usefully consistent manner, though not a real 'accuracy' value.
-#
-# This is great and not entirely surprising. We can take a look at an example:
-#
-print('Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].words)))
-print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
-for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
-    print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
-###############################################################################
-# Notice above that the most similar document (usually the same text) is has a
-# similarity score approaching 1.0. However, the similarity score for the
-# second-ranked documents should be significantly lower (assuming the documents
-# are in fact different) and the reasoning becomes obvious when we examine the
-# text itself.
-#
-# We can run the next cell repeatedly to see a sampling other target-document
-# comparisons.
-#
-
-# Pick a random document from the corpus and infer a vector from the model
 import random
 
 doc_id = random.randint(0, len(train_corpus) - 1)
@@ -426,20 +406,13 @@ print('Train Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_i
 sim_id = second_ranks[doc_id]
 print('Similar Document {}: «{}»\n'.format(sim_id, ' '.join(train_corpus[sim_id[0]].words)))
 
-###############################################################################
-# Testing the Model
-# -----------------
-#
-# Using the same approach above, we'll infer the vector for a randomly chosen
-# test document, and compare the document to our model by eye.
-#
 
-# Pick a random document from the test corpus and infer a vector from the model
+# Pick a random document from the test corpus and infer a vector from the model testing model
 doc_id = random.randint(0, len(test_corpus) - 1)
 inferred_vector = model.infer_vector(test_corpus[doc_id])
 sims = model.dv.most_similar([inferred_vector], topn=len(model.dv))
 
-# Compare and print the most/median/least similar documents from the train corpus
+# Compare and print the most/median/the least similar documents from the train corpus
 print('Test Document ({}): «{}»\n'.format(doc_id, ' '.join(test_corpus[doc_id])))
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
@@ -471,3 +444,7 @@ for label, index in [('MOST', 0), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims
 # * `Lee Corpus <http://faculty.sites.uci.edu/mdlee/similarity-data/>`__
 # * `IMDB Doc2Vec Tutorial <doc2vec-IMDB.ipynb>`_
 #
+# load the model from disk
+loaded_model = pickle.load(open(pickle_save, 'rb'))
+result = loaded_model.score(X_test, y_test)
+print('result from pickle', result)
