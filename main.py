@@ -161,7 +161,7 @@ missing_narrative = ['N/a', "Nan", "NaN", np.nan, "na", "Na", None]
 # needed to ignore first column (importing duplicate first col)
 # https://www.statology.org/pandas-read-csv-ignore-first-column/
 
-print('this is csv_tmp_file', csv_tmp_file)
+# print('this is csv_tmp_file', csv_tmp_file)
 
 df_iterator = pd.read_csv(
     csv_train_file,
@@ -285,12 +285,12 @@ test_corpus = list(read_corpus(csv_test_file))
 ###############################################################################
 # Let's take a look at the training corpus
 #
-print(train_corpus[:2])
+print('this is train corpus', train_corpus[:2])
 
 ###############################################################################
 # And the testing corpus looks like this:
 #
-print(test_corpus[:2])
+print('this is test corpus', test_corpus[:2])
 
 ###############################################################################
 # Notice that the testing corpus is just a list of lists and does not contain
@@ -315,7 +315,7 @@ print(test_corpus[:2])
 # with such small datasets.
 # adding max_vocab_size=50000 to reduce memory issue and size=300
 # https://stackoverflow.com/questions/59050644/memoryerror-unable-to-allocate-array-with-shape-and-data-type-float32-while-usi
-model = gensim.models.doc2vec.Doc2Vec(vector_size=50, min_count=2, epochs=40, max_vocab_size=10000)
+model = gensim.models.doc2vec.Doc2Vec(vector_size=50, min_count=2, epochs=40, max_vocab_size=50000)
 
 ###############################################################################
 # Build a vocabulary
@@ -401,28 +401,28 @@ print('this is ranking', counter)
 
 import random
 
-#doc_id = random.randint(0, len(train_corpus) - 1)
+doc_id = random.randint(0, len(train_corpus) - 1)
 
 # Compare and print the second-most-similar document
-#print('Train Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].words)))
-#sim_id = second_ranks[doc_id]
-#print('Similar Document {}: «{}»\n'.format(sim_id, ' '.join(train_corpus[sim_id[0]].words)))
+print('Train Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].words)))
+sim_id = second_ranks[doc_id]
+print('Similar Document {}: «{}»\n'.format(sim_id, ' '.join(train_corpus[sim_id[0]].words)))
 
 # Pick a random document from the test corpus and infer a vector from the model testing model
-doc_id = random.randint(0, len(test_corpus) - 1)
-inferred_vector = model.infer_vector(test_corpus[doc_id])
+doc_id2 = random.randint(0, len(test_corpus) - 1)
+inferred_vector = model.infer_vector(test_corpus[doc_id2])
 sims = model.dv.most_similar([inferred_vector], topn=len(model.dv))
 
 # Compare and print the most/median/the least similar documents from the train corpus
-print('Test Document ({}): «{}»\n'.format(doc_id, ' '.join(test_corpus[doc_id])))
+print('Test Document ({}): «{}»\n'.format(doc_id, ' '.join(test_corpus[doc_id2])))
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
-#for label, index in [('MOST', 0), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
-#    print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
+for label, index in [('MOST', 0), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
+    print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
-#print('Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].words)))
-#print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
-#for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
-#    print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
+print('Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].words)))
+print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
+for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
+    print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 ###############################################################################
 # Conclusion
 # ----------
