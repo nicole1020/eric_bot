@@ -12,8 +12,10 @@ import pickle
 
 import smart_open
 from imblearn.over_sampling import SMOTE
+from sklearn import metrics
 
 from sklearn.metrics import classification_report
+from sklearn.tree import DecisionTreeClassifier
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
@@ -152,6 +154,7 @@ test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
 csv_train_file = os.path.join(test_data_dir, 'complaints_processed.csv')
 csv_test_file = os.path.join(test_data_dir, 'emails from Seattle Jewelry Company.csv')
 csv_tmp_file = os.path.join(test_data_dir, 'data_part_.csv')
+csv_test_result = os.path.join(test_data_dir, 'SJCompany.csv')
 
 pickle_save = os.path.join(test_data_dir, 'eric_model.sav')
 # issue with values
@@ -315,7 +318,7 @@ print('this is test corpus', test_corpus[:2])
 # with such small datasets.
 # adding max_vocab_size=50000 to reduce memory issue and size=300
 # https://stackoverflow.com/questions/59050644/memoryerror-unable-to-allocate-array-with-shape-and-data-type-float32-while-usi
-model = gensim.models.doc2vec.Doc2Vec(vector_size=50, min_count=2, epochs=40, max_vocab_size=50000)
+model = gensim.models.doc2vec.Doc2Vec(vector_size=50, min_count=2, epochs=40, max_vocab_size=20000)
 
 ###############################################################################
 # Build a vocabulary
@@ -355,6 +358,12 @@ print(list_of_terms)
 print(vector)
 
 pickle.dump(model, open(pickle_save, 'wb'))
+
+dc = DecisionTreeClassifier()
+dc = dc.fit(X_train, y_train)
+y_predict = dc.predict(X_test)
+print("Accuracy:", metrics.accuracy_score(y_test, y_predict))
+plt.show()
 
 ###############################################################################
 # Note that ``infer_vector()`` does *not* take a string, but rather a list of
@@ -405,16 +414,20 @@ doc_id = random.randint(0, len(train_corpus) - 1)
 
 # Compare and print the second-most-similar document
 print('Train Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].words)))
-sim_id = second_ranks[doc_id]
-print('Similar Document {}: «{}»\n'.format(sim_id, ' '.join(train_corpus[sim_id[0]].words)))
+print('this is doc_id', doc_id)
+sim_id = random.randint(0, len(train_corpus) - 1)
+print('this is sim_id', sim_id)
+print('Similar Document {}: «{}»\n'.format(sim_id, ' '.join(train_corpus[sim_id].words)))
 
 # Pick a random document from the test corpus and infer a vector from the model testing model
 doc_id2 = random.randint(0, len(test_corpus) - 1)
-inferred_vector = model.infer_vector(test_corpus[doc_id2])
-sims = model.dv.most_similar([inferred_vector], topn=len(model.dv))
+print('this is docid2', doc_id2)
+inferred_vect = model.infer_vector(test_corpus[doc_id2].words)
+sims = model.dv.most_similar([inferred_vect], topn=len(model.dv))
 
+# added .words after 426 and 431.
 # Compare and print the most/median/the least similar documents from the train corpus
-print('Test Document ({}): «{}»\n'.format(doc_id, ' '.join(test_corpus[doc_id2])))
+print('Test Document ({}): «{}»\n'.format(doc_id, ' '.join(test_corpus[doc_id2].words)))
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
@@ -449,7 +462,3 @@ for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2)
 # * `Lee Corpus <http://faculty.sites.uci.edu/mdlee/similarity-data/>`__
 # * `IMDB Doc2Vec Tutorial <doc2vec-IMDB.ipynb>`_
 #
-# load the model from disk
-loaded_model = pickle.load(open(pickle_save, 'rb'))
-result = loaded_model.score(X_test, y_test)
-print('result from pickle', result)
