@@ -12,7 +12,7 @@ import pickle
 
 import smart_open
 from imblearn.over_sampling import SMOTE
-from sklearn import metrics
+from sklearn import metrics, tree
 
 from sklearn.metrics import classification_report
 from sklearn.tree import DecisionTreeClassifier
@@ -359,10 +359,16 @@ print(vector)
 
 pickle.dump(model, open(pickle_save, 'wb'))
 
-dc = DecisionTreeClassifier()
-dc = dc.fit(X_train, y_train)
-y_predict = dc.predict(X_test)
+#dc = DecisionTreeClassifier()
+#dc = dc.fit(X_train, y_train)
+
+dct = tree.DecisionTreeClassifier(random_state=0)
+dcts = dct.fit(X_train, y_train)
+tree.plot_tree(dcts)
+
+y_predict = dct.predict(X_test)
 print("Accuracy:", metrics.accuracy_score(y_test, y_predict))
+cf = confusion_matrix(X_test, y_test)
 plt.show()
 
 ###############################################################################
