@@ -13,7 +13,10 @@ import pickle
 import smart_open
 from imblearn.over_sampling import SMOTE
 from sklearn import metrics, tree
-
+from sklearn.datasets import make_classification
+from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
 from sklearn.metrics import classification_report
 from sklearn.tree import DecisionTreeClassifier
 
@@ -230,6 +233,7 @@ x_for = vectorize.fit_transform(df['narrative'][:8219].values.astype('U'))
 
 pd.set_option('display.max_colwidth', None)
 x_sm, y_sm = SMOTE().fit_resample(x_for, df['product'][:8219])
+X, y = make_classification(random_state=0)
 X_train, X_test, y_train, y_test = train_test_split(x_sm, y_sm, test_size=0.3, random_state=0)
 print('this is xtrain', X_train.shape)
 print('this is xtest', X_test.shape)
@@ -359,18 +363,21 @@ print(vector)
 
 pickle.dump(model, open(pickle_save, 'wb'))
 
-#dc = DecisionTreeClassifier()
-#dc = dc.fit(X_train, y_train)
-
-dct = tree.DecisionTreeClassifier(random_state=0)
-dcts = dct.fit(X_train, y_train)
-tree.plot_tree(dcts)
-
-y_predict = dct.predict(X_test)
+dc = DecisionTreeClassifier()
+dc1 = dc.fit(X_train, y_train)
+y_predict = dc.predict(X_test)
 print("Accuracy:", metrics.accuracy_score(y_test, y_predict))
-cf = confusion_matrix(X_test, y_test)
-plt.show()
 
+dc2 = tree.DecisionTreeClassifier(random_state=0)
+dcs2 = dc2.fit(X_train, y_train)
+tree.plot_tree(dcs2)
+# added tree plot and confusion matrix for display
+
+dcs = SVC(random_state=0)
+dcs.fit(X_train, y_train)
+SVC(random_state=0)
+ConfusionMatrixDisplay.from_estimator(dcs, X_test, y_test)
+plt.show()
 ###############################################################################
 # Note that ``infer_vector()`` does *not* take a string, but rather a list of
 # string tokens, which should have already been tokenized the same way as the
