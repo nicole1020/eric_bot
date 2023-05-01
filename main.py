@@ -233,7 +233,7 @@ x_for = vectorize.fit_transform(df['narrative'][:8219].values.astype('U'))
 
 pd.set_option('display.max_colwidth', None)
 x_sm, y_sm = SMOTE().fit_resample(x_for, df['product'][:8219])
-X, y = make_classification(random_state=0)
+# X, y = make_classification(random_state=0)
 X_train, X_test, y_train, y_test = train_test_split(x_sm, y_sm, test_size=0.3, random_state=0)
 print('this is xtrain', X_train.shape)
 print('this is xtest', X_test.shape)
