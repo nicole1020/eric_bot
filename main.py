@@ -6,18 +6,14 @@ Introduces Gensim's Doc2Vec model and demonstrates its use on the
 `Lee Corpus <https://hekyll.services.adelaide.edu.au/dspace/bitstream/2440/28910/1/hdl_28910.pdf>`__.
 
 """
-import csv
 import logging
 import pickle
 
 import smart_open
 from imblearn.over_sampling import SMOTE
 from sklearn import metrics, tree
-from sklearn.datasets import make_classification
 from sklearn.metrics import ConfusionMatrixDisplay
-from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from sklearn.metrics import classification_report
 from sklearn.tree import DecisionTreeClassifier
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -143,14 +139,31 @@ import os
 import gensim
 import numpy as np
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-import seaborn as sns
-from sklearn.metrics import confusion_matrix
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from nltk import word_tokenize, SnowballStemmer
 from nltk.corpus import stopwords
 from sklearn.naive_bayes import MultinomialNB
+import sqlite3 as sl
+
+#connect to local database
+
+connect_database = sl.connect('my_test_customers.db')
+
+#create table in db
+with connect_database:
+    connect_database.execute("""
+    CREATE TABLE CUSTOMER (
+    id INTEGER NOT NULL
+    PRIMARY KEY AUTOINCREMENT, 
+    name TEXT,
+    email TEXT,
+    notes TEXT,
+    docid INTEGER);
+    """)
+sql = 'INSERT INTO CUSTOMER(id, name, email, notes, docid) values(?,?,?,?,?)'
+data = []
 
 # Set file names for train and test data
 test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
@@ -229,10 +242,10 @@ def tokenizer(text):
 
 
 vectorize = TfidfVectorizer(analyzer=tokenizer)
-x_for = vectorize.fit_transform(df['narrative'][:8219].values.astype('U'))
+x_for = vectorize.fit_transform(df['narrative'][:10000].values.astype('U'))
 
 pd.set_option('display.max_colwidth', None)
-x_sm, y_sm = SMOTE().fit_resample(x_for, df['product'][:8219])
+x_sm, y_sm = SMOTE().fit_resample(x_for, df['product'][:10000])
 # X, y = make_classification(random_state=0)
 X_train, X_test, y_train, y_test = train_test_split(x_sm, y_sm, test_size=0.3, random_state=0)
 print('this is xtrain', X_train.shape)
@@ -366,7 +379,7 @@ pickle.dump(model, open(pickle_save, 'wb'))
 dc = DecisionTreeClassifier()
 dc1 = dc.fit(X_train, y_train)
 y_predict = dc.predict(X_test)
-print("Accuracy:", metrics.accuracy_score(y_test, y_predict))
+print("Accuracy check:", metrics.accuracy_score(y_test, y_predict))
 
 dc2 = tree.DecisionTreeClassifier(random_state=0)
 dcs2 = dc2.fit(X_train, y_train)
@@ -440,7 +453,7 @@ sims = model.dv.most_similar([inferred_vect], topn=len(model.dv))
 
 # added .words after 426 and 431.
 # Compare and print the most/median/the least similar documents from the train corpus
-print('Test Document ({}): «{}»\n'.format(doc_id, ' '.join(test_corpus[doc_id2].words)))
+print('Test Document ({}): «{}»\n'.format(doc_id2, ' '.join(test_corpus[doc_id2].words)))
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
