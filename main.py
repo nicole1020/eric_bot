@@ -145,25 +145,47 @@ import matplotlib.pyplot as plt
 from nltk import word_tokenize, SnowballStemmer
 from nltk.corpus import stopwords
 from sklearn.naive_bayes import MultinomialNB
-import sqlite3 as sl
 
-#connect to local database
-
-connect_database = sl.connect('my_test_customers.db')
 
 #create table in db
+# running into issues with .execute command https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html
+
+import sqlite3 as sl
+
+# connect to local database
+# create table in db
+# running into issues with .execute command https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html
+
+
+connect_database = sl.connect('my_test_customers.db')
+###############################################################################
+#
+#with connect_database:
+ #   connect_database.execute('''
+  #                  CREATE TABLE CUSTOMER (
+   #                 id INTEGER NOT NULL
+    #        PRIMARY KEY AUTOINCREMENT,
+     #               name TEXT,
+      #              email TEXT,
+       #             notes TEXT
+        #            )
+         #      ''')
+###############################################################################
+sql = 'INSERT INTO CUSTOMER( name, email, notes) values(?,?,?)'
+customer_data = [('John Doe', 'jdoe@email.com','order number 11 and contact docid 2 and 7'),
+        ( 'Johnny Doe', 'jhdoe@email.com','order number 12 and contact docid 3 '),
+        ('Jane Doe', 'jdoe@email.com','order number 13 and contact docid 4 '),
+        ( 'Janey Do', 'jdoe@email.com','order number 14 and contact docid 5 '),
+        ('Joey Doe', 'jdoe@email.com','order number 15 and contact docid 6 '),
+        ]
 with connect_database:
-    connect_database.execute("""
-    CREATE TABLE CUSTOMER (
-    id INTEGER NOT NULL
-    PRIMARY KEY AUTOINCREMENT, 
-    name TEXT,
-    email TEXT,
-    notes TEXT,
-    docid INTEGER);
-    """)
-sql = 'INSERT INTO CUSTOMER(id, name, email, notes, docid) values(?,?,?,?,?)'
-data = []
+    connect_database.executemany(sql, customer_data)
+cursor = connect_database.cursor()
+def customer_data():
+    connect_database.execute("SELECT * FROM CUSTOMER")
+    print(cursor.fetchall())
+customer_data()
+connect_database.commit()
 
 # Set file names for train and test data
 test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
