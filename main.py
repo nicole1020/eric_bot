@@ -1,5 +1,6 @@
 """
-Computer Science Capstone C964| eric_bot | email response in corporations | Nicole Mau | nmau@wgu.edu | 001336361
+"Computer Science Capstone C964 | Nicole Mau | nmau@wgu.edu | "
+          "001336361 | eric_bot | email response in corporations"
 """
 import logging
 import pickle
@@ -25,6 +26,8 @@ import sqlite3 as sl
 from sklearn.metrics import classification_report
 import collections
 import random
+from tkinter import *
+import tkinter.ttk as ttk
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
@@ -162,6 +165,14 @@ def order_data():
 
 print('orders database:')
 order_data()
+
+
+# https://www.krazyprogrammer.com/2020/12/how-to-search-data-from-sqlite-in.html
+def order_number_search(orderID):
+    if orderID.get() != "":
+        cursor = connect_database.execute("SELECT * FROM ORDERS WHERE id LIKE ?", ('%' + str(orderID.get()) + '%',))
+        results = cursor.fetchall()
+        print(results)
 
 
 def update_table_rows_order():
@@ -500,3 +511,46 @@ for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2)
 # D. Lee's Website <http://faculty.sites.uci.edu/mdlee>`_ * `Lee Corpus
 # <http://faculty.sites.uci.edu/mdlee/similarity-data/>`__ * `IMDB Doc2Vec Tutorial <doc2vec-IMDB.ipynb>`_
 #
+
+if __name__ == '__main__':
+    print("Computer Science Capstone C964 | Nicole Mau | nmau@wgu.edu | "
+          "001336361 | eric_bot | email response in corporations")
+
+    # loop until user is satisfied
+    isExit = True
+    while isExit:
+        print("\nOptions:")
+        print("1. Print All Orders in Table")
+        print("2. Get a Single Order Status with ID")
+        print("3. Get a single Order Status with a Time")
+        print("4. Exit the Program")
+        option = input("Chose an option (1,2,3, or 4): ")
+        if option == "1":
+            order_data()
+
+            # print("\nTotal miles traveled today: ", totalmiles)
+        elif option == "2":
+            print("Please enter your order ID")
+            orderID = input(" ")
+            searchresult = order_number_search(int(orderID))
+            print(searchresult)
+
+        elif option == "3":
+            print("Please enter your order ID")
+            user_id_request = input(" ")
+            print("Please enter a time (HH:MM) for single package information:")
+            user_time_hours = input(" ")
+            h, m = user_time_hours.split(':')
+            user_time_delta = timedelta(hours=int(h), minutes=int(m))
+            # user_time = timedelta(user_time_delta).date()
+
+            getPackageDataTime(user_time_delta, user_id_request)
+            # status = as delivered change from status/ take usertime and go through packages on truck and if at
+            # 10:00 am and look at delivery time of 1st package and it's at 9
+
+
+        elif option == '4':
+            isExit = False
+        else:
+            print("Invalid option, please try again!")
+        # main - END
