@@ -146,8 +146,7 @@ from nltk import word_tokenize, SnowballStemmer
 from nltk.corpus import stopwords
 from sklearn.naive_bayes import MultinomialNB
 
-
-#create table in db
+# create table in db
 # running into issues with .execute command https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html
 
 import sqlite3 as sl
@@ -160,32 +159,50 @@ import sqlite3 as sl
 connect_database = sl.connect('my_test_customers.db')
 ###############################################################################
 #
-#with connect_database:
- #   connect_database.execute('''
-  #                  CREATE TABLE CUSTOMER (
-   #                 id INTEGER NOT NULL
-    #        PRIMARY KEY AUTOINCREMENT,
-     #               name TEXT,
-      #              email TEXT,
-       #             notes TEXT
-        #            )
-         #      ''')
-###############################################################################
+# with connect_database:
+#   connect_database.execute('''
+#                  CREATE TABLE CUSTOMER (
+#                 id INTEGER NOT NULL
+#        PRIMARY KEY AUTOINCREMENT,
+#               name TEXT,
+#              email TEXT,
+#             notes TEXT
+#            )
+#      ''')
+
 sql = 'INSERT INTO CUSTOMER( name, email, notes) values(?,?,?)'
-customer_data = [('John Doe', 'jdoe@email.com','order number 11 and contact docid 2 and 7'),
-        ( 'Johnny Doe', 'jhdoe@email.com','order number 12 and contact docid 3 '),
-        ('Jane Doe', 'jdoe@email.com','order number 13 and contact docid 4 '),
-        ( 'Janey Do', 'jdoe@email.com','order number 14 and contact docid 5 '),
-        ('Joey Doe', 'jdoe@email.com','order number 15 and contact docid 6 '),
-        ]
+customer_data = [('John Doe', 'jdoe@email.com', 'order number 11'),
+                 ('Johnny Doe', 'jhdoe@email.com', 'order number 12'),
+                 ('Jane Doe', 'jdoe@email.com', 'order number 13'),
+                 ('Janey Do', 'jdoe@email.com', 'order number 14'),
+                 ('Joey Doe', 'jdoe@email.com', 'order number 15'),
+                 ]
+###############################################################################
+
 with connect_database:
     connect_database.executemany(sql, customer_data)
 cursor = connect_database.cursor()
+
+
+# deletes any row with name and email = remove duplicate entries/customer data
+def update_table_rows():
+    delete_statement = 'DELETE FROM CUSTOMER WHERE rowid > (SELECT MIN(rowid) FROM CUSTOMER c2 WHERE CUSTOMER.name = ' \
+                       'c2.name AND CUSTOMER.email = c2.email); '
+    connect_database.execute(delete_statement)
+
+
+update_table_rows()
+
+
 def customer_data():
-    connect_database.execute("SELECT * FROM CUSTOMER")
+    # select_statement = "SELECT * FROM CUSTOMER WHERE name = %(name)s"
+    select_statement = "SELECT * FROM CUSTOMER"
+    connect_database.execute(select_statement)
+
     print(cursor.fetchall())
+
+
 customer_data()
-connect_database.commit()
 
 # Set file names for train and test data
 test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
