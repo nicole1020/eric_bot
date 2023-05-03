@@ -157,6 +157,8 @@ import sqlite3 as sl
 
 
 connect_database = sl.connect('my_test_customers.db')
+
+
 ###############################################################################
 #
 # with connect_database:
@@ -170,18 +172,22 @@ connect_database = sl.connect('my_test_customers.db')
 #            )
 #      ''')
 
-sql = 'INSERT INTO CUSTOMER( name, email, notes) values(?,?,?)'
-customer_data = [('John Doe', 'jdoe@email.com', 'order number 11'),
-                 ('Johnny Doe', 'jhdoe@email.com', 'order number 12'),
-                 ('Jane Doe', 'jdoe@email.com', 'order number 13'),
-                 ('Janey Do', 'jdoe@email.com', 'order number 14'),
-                 ('Joey Doe', 'jdoe@email.com', 'order number 15'),
-                 ]
-###############################################################################
 
-with connect_database:
-    connect_database.executemany(sql, customer_data)
-cursor = connect_database.cursor()
+###############################################################################
+def add_customer_data():
+    sql = 'INSERT INTO CUSTOMER( name, email, notes) values(?,?,?)'
+    customer_table = [('John Doe', 'jdoe@email.com', 'order number 11'),
+                     ('Johnny Doe', 'jhdoe@email.com', 'order number 12'),
+                     ('Jane Doe', 'jdoe@email.com', 'order number 13'),
+                     ('Janey Do', 'jdoe@email.com', 'order number 14'),
+                     ('Joey Doe', 'jdoe@email.com', 'order number 15'),
+                     ('Katsu Doe', 'kdoe@email.com', 'order number 16')
+                     ]
+
+    connect_database.executemany(sql, customer_table)
+
+
+add_customer_data()
 
 
 # deletes any row with name and email = remove duplicate entries/customer data
@@ -199,11 +205,9 @@ def customer_data():
     select_statement = "SELECT * FROM CUSTOMER"
     connect_database.execute(select_statement)
 
-    print(cursor.fetchall())
-
 
 customer_data()
-
+connect_database.commit()
 # Set file names for train and test data
 test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
 csv_train_file = os.path.join(test_data_dir, 'complaints_processed.csv')
