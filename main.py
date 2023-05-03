@@ -177,12 +177,14 @@ connect_database = sl.connect('my_test_customers.db')
 def add_customer_data():
     sql = 'INSERT INTO CUSTOMER( name, email, notes) values(?,?,?)'
     customer_table = [('John Doe', 'jdoe@email.com', 'order number 11'),
-                     ('Johnny Doe', 'jhdoe@email.com', 'order number 12'),
-                     ('Jane Doe', 'jdoe@email.com', 'order number 13'),
-                     ('Janey Do', 'jdoe@email.com', 'order number 14'),
-                     ('Joey Doe', 'jdoe@email.com', 'order number 15'),
-                     ('Katsu Doe', 'kdoe@email.com', 'order number 16')
-                     ]
+                      ('Johnny Doe', 'jhdoe@email.com', 'order number 12'),
+                      ('Jane Doe', 'jdoe@email.com', 'order number 13'),
+                      ('Janey Do', 'jdoe@email.com', 'order number 14'),
+                      ('Joey Doe', 'jdoe@email.com', 'order number 15'),
+                      ('Katsu Doe', 'kdoe@email.com', 'order number 16'),
+                      ('M Niece', 'mniece@email.com', 'order number 17'),
+                      ('A Child', 'achild@email.com', 'order number 18')
+                      ]
 
     connect_database.executemany(sql, customer_table)
 
@@ -200,10 +202,20 @@ def update_table_rows():
 update_table_rows()
 
 
-def customer_data():
+def customer_data2():
     # select_statement = "SELECT * FROM CUSTOMER WHERE name = %(name)s"
     select_statement = "SELECT * FROM CUSTOMER"
     connect_database.execute(select_statement)
+
+
+customer_data2()
+
+
+def customer_data():
+    select_all_table = "SELECT * FROM CUSTOMER"
+    cursor = connect_database.execute(select_all_table)
+    results = cursor.fetchall()
+    print(results)
 
 
 customer_data()
