@@ -1,10 +1,5 @@
-r"""
-Doc2Vec Model
-=============
-
-Introduces Gensim's Doc2Vec model and demonstrates its use on the
-`Lee Corpus <https://hekyll.services.adelaide.edu.au/dspace/bitstream/2440/28910/1/hdl_28910.pdf>`__.
-
+"""
+Computer Science Capstone C964| eric_bot | email response in corporations | Nicole Mau | nmau@wgu.edu | 001336361
 """
 import logging
 import pickle
@@ -16,125 +11,6 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-
-###############################################################################
-# Doc2Vec is a :ref:`core_concepts_model` that represents each
-# :ref:`core_concepts_document` as a :ref:`core_concepts_vector`.  This
-# tutorial introduces the model and demonstrates how to train and assess it.
-#
-# Here's a list of what we'll be doing:
-#
-# 0. Review the relevant models: bag-of-words, Word2Vec, Doc2Vec
-# 1. Load and preprocess the training and test corpora (see :ref:`core_concepts_corpus`)
-# 2. Train a Doc2Vec :ref:`core_concepts_model` model using the training corpus
-# 3. Demonstrate how the trained model can be used to infer a :ref:`core_concepts_vector`
-# 4. Assess the model
-# 5. Test the model on the test corpus
-#
-# Review: Bag-of-words
-# --------------------
-#
-# .. Note:: Feel free to skip these review sections if you're already familiar with the models.
-#
-# You may be familiar with the `bag-of-words model
-# <https://en.wikipedia.org/wiki/Bag-of-words_model>`_ from the
-# :ref:`core_concepts_vector` section.
-# This model transforms each document to a fixed-length vector of integers.
-# For example, given the sentences:
-#
-# - ``John likes to watch movies. Mary likes movies too.``
-# - ``John also likes to watch football games. Mary hates football.``
-#
-# The model outputs the vectors:
-#
-# - ``[1, 2, 1, 1, 2, 1, 1, 0, 0, 0, 0]``
-# - ``[1, 1, 1, 1, 0, 1, 0, 1, 2, 1, 1]``
-#
-# Each vector has 10 elements, where each element counts the number of times a
-# particular word occurred in the document.
-# The order of elements is arbitrary.
-# In the example above, the order of the elements corresponds to the words:
-# ``["John", "likes", "to", "watch", "movies", "Mary", "too", "also", "football", "games", "hates"]``.
-#
-# Bag-of-words models are surprisingly effective, but have several weaknesses.
-#
-# First, they lose all information about word order: "John likes Mary" and
-# "Mary likes John" correspond to identical vectors. There is a solution: bag
-# of `n-grams <https://en.wikipedia.org/wiki/N-gram>`__
-# models consider word phrases of length n to represent documents as
-# fixed-length vectors to capture local word order but suffer from data
-# sparsity and high dimensionality.
-#
-# Second, the model does not attempt to learn the meaning of the underlying
-# words, and as a consequence, the distance between vectors doesn't always
-# reflect the difference in meaning.  The ``Word2Vec`` model addresses this
-# second problem.
-#
-# Review: ``Word2Vec`` Model
-# --------------------------
-#
-# ``Word2Vec`` is a more recent model that embeds words in a lower-dimensional
-# vector space using a shallow neural network. The result is a set of
-# word-vectors where vectors close together in vector space have similar
-# meanings based on context, and word-vectors distant to each other have
-# differing meanings. For example, ``strong`` and ``powerful`` would be close
-# together and ``strong`` and ``Paris`` would be relatively far.
-#
-# Gensim's :py:class:`~gensim.models.word2vec.Word2Vec` class implements this model.
-#
-# With the ``Word2Vec`` model, we can calculate the vectors for each **word** in a document.
-# But what if we want to calculate a vector for the **entire document**\ ?
-# We could average the vectors for each word in the document - while this is quick and crude, it can often be useful.
-# However, there is a better way...
-#
-# Introducing: Paragraph Vector
-# -----------------------------
-#
-# .. Important:: In Gensim, we refer to the Paragraph Vector model as ``Doc2Vec``.
-#
-# Le and Mikolov in 2014 introduced the `Doc2Vec algorithm <https://cs.stanford.edu/~quocle/paragraph_vector.pdf>`__,
-# which usually outperforms such simple-averaging of ``Word2Vec`` vectors.
-#
-# The basic idea is: act as if a document has another floating word-like
-# vector, which contributes to all training predictions, and is updated like
-# other word-vectors, but we will call it a doc-vector. Gensim's
-# :py:class:`~gensim.models.doc2vec.Doc2Vec` class implements this algorithm.
-#
-# There are two implementations:
-#
-# 1. Paragraph Vector - Distributed Memory (PV-DM)
-# 2. Paragraph Vector - Distributed Bag of Words (PV-DBOW)
-#
-# .. Important::
-#   Don't let the implementation details below scare you.
-#   They're advanced material: if it's too much, then move on to the next section.
-#
-# PV-DM is analogous to Word2Vec CBOW. The doc-vectors are obtained by training
-# a neural network on the synthetic task of predicting a center word based an
-# average of both context word-vectors and the full document's doc-vector.
-#
-# PV-DBOW is analogous to Word2Vec SG. The doc-vectors are obtained by training
-# a neural network on the synthetic task of predicting a target word just from
-# the full document's doc-vector. (It is also common to combine this with
-# skip-gram testing, using both the doc-vector and nearby word-vectors to
-# predict a single target word, but only one at a time.)
-#
-# Prepare the Training and Test Data
-# ----------------------------------
-#
-# For this tutorial, we'll be training our model using the `Lee Background
-# Corpus
-# <https://hekyll.services.adelaide.edu.au/dspace/bitstream/2440/28910/1/hdl_28910.pdf>`_
-# included in gensim. This corpus contains 314 documents selected from the
-# Australian Broadcasting Corporation’s news mail service, which provides text
-# e-mails of headline stories and covers a number of broad topics.
-#
-# And we'll test our model by eye using the much shorter `Lee Corpus
-# <https://hekyll.services.adelaide.edu.au/dspace/bitstream/2440/28910/1/hdl_28910.pdf>`_
-# which contains 50 documents.
-#
-
 import os
 import gensim
 import numpy as np
@@ -145,51 +21,98 @@ import matplotlib.pyplot as plt
 from nltk import word_tokenize, SnowballStemmer
 from nltk.corpus import stopwords
 from sklearn.naive_bayes import MultinomialNB
-
-# create table in db
-# running into issues with .execute command https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html
-
 import sqlite3 as sl
+from sklearn.metrics import classification_report
+import collections
+import random
 
-# connect to local database
-# create table in db
-# running into issues with .execute command https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
+# create sqllite sql database for future sensitive customer data
 
 connect_database = sl.connect('my_test_customers.db')
 
 
 ###############################################################################
+# create table in db running into issues with .execute command
+# https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html
+
+
+# connect to local database create table in db running into issues with .execute command
+# https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html
+# https://stackoverflow.com/questions/53128279/how-to-print-output-from-sqlite3-in-python
 #
-# with connect_database:
-#   connect_database.execute('''
-#                  CREATE TABLE CUSTOMER (
-#                 id INTEGER NOT NULL
-#        PRIMARY KEY AUTOINCREMENT,
-#               name TEXT,
-#              email TEXT,
-#             notes TEXT
-#            )
-#      ''')
+
+# reset table to make it clean again
+# def clear_customer_data():
+#  delete_all = "DELETE FROM ORDERS"
+# connect_database.execute(delete_all)
 
 
+# clear_customer_data()
+# def add_customer_data():
+#   sql = 'INSERT INTO CUSTOMER( name, email, notes) values(?,?,?)'
+#    customer_table = [('John Doe', 'jdoe@email.com', 'order number 11'),
+#             ('Johnny Doe', 'jhdoe@email.com', 'order number 12'),
+#              ('Jane Doe', 'jdoe@email.com', 'order number 13'),
+#               ('Janey Do', 'jdoe@email.com', 'order number 14'),
+#                ('Joey Doe', 'jdoe@email.com', 'order number 15'),
+#                 ('Katsu Dog', 'kdog@email.com', 'order number 16'),
+#                  ('M Niece', 'mniece@email.com', 'order number 17'),
+#                   ('A Child', 'achild@email.com', 'order number 18'),
+#                    ('Mochi Dog', 'mdog@email.com', 'order number 19')
+#                     ]
+
+#    connect_database.executemany(sql, customer_table)
+
+
+# add_customer_data()
+
+
+# def add_order_data():
+# sql = 'INSERT INTO ORDERS( status, email, notes) values(?,?,?)'
+# order_table = [('en-route', 'jdoe@email.com', 'cc'),
+#         ('pending', 'jhdoe@email.com', 'cc'),
+#          ('at hub', 'jdoe@email.com', 'wire'),
+#           ('pending', 'jdoe@email.com', 'cc'),
+#             ('delayed', 'jdoe@email.com', 'cc'),
+#             ('delivered', 'kdog@email.com', 'cc'),
+#              ('delivered', 'mniece@email.com', 'cc'),
+#               ('delivered', 'achild@email.com', 'cc'),
+#                ('delivered', 'mdog@email.com', 'cc')
+#                 ]
+
+#   connect_database.executemany(sql, order_table)
+
+
+# add_order_data()
 ###############################################################################
-def add_customer_data():
-    sql = 'INSERT INTO CUSTOMER( name, email, notes) values(?,?,?)'
-    customer_table = [('John Doe', 'jdoe@email.com', 'order number 11'),
-                      ('Johnny Doe', 'jhdoe@email.com', 'order number 12'),
-                      ('Jane Doe', 'jdoe@email.com', 'order number 13'),
-                      ('Janey Do', 'jdoe@email.com', 'order number 14'),
-                      ('Joey Doe', 'jdoe@email.com', 'order number 15'),
-                      ('Katsu Doe', 'kdoe@email.com', 'order number 16'),
-                      ('M Niece', 'mniece@email.com', 'order number 17'),
-                      ('A Child', 'achild@email.com', 'order number 18')
-                      ]
 
-    connect_database.executemany(sql, customer_table)
+def create_customer_table():
+    connect_database.execute('''
+                  CREATE TABLE IF NOT EXISTS CUSTOMER (
+                 id INTEGER NOT NULL
+        PRIMARY KEY AUTOINCREMENT,
+               name TEXT,
+              email TEXT,
+             notes TEXT
+            )
+      ''')
 
 
-add_customer_data()
+create_customer_table()
+
+
+# use this to update OR add new customer specific ones can add later with UI
+
+def add_or_update_customer_data():
+    sql_update = "INSERT OR REPLACE INTO CUSTOMER (name, email, notes) VALUES ('John Foo', 'jfoo@email.com', " \
+                 "'order number 20') "
+
+    connect_database.execute(sql_update)
+
+
+add_or_update_customer_data()
 
 
 # deletes any row with name and email = remove duplicate entries/customer data
@@ -202,15 +125,8 @@ def update_table_rows():
 update_table_rows()
 
 
-def customer_data2():
-    # select_statement = "SELECT * FROM CUSTOMER WHERE name = %(name)s"
-    select_statement = "SELECT * FROM CUSTOMER"
-    connect_database.execute(select_statement)
-
-
-customer_data2()
-
-
+# print neatly  https://stackoverflow.com/questions/305378/list-of-tables-db-schema-dump-etc-using-the-python-sqlite3
+# -api
 def customer_data():
     select_all_table = "SELECT * FROM CUSTOMER"
     cursor = connect_database.execute(select_all_table)
@@ -218,8 +134,55 @@ def customer_data():
     print(results)
 
 
+print('customer database:')
 customer_data()
+
+
+def create_order_table():
+    connect_database.execute('''   
+                      CREATE TABLE IF NOT EXISTS ORDERS (
+                     id INTEGER NOT NULL
+            PRIMARY KEY AUTOINCREMENT,
+                    status TEXT,
+                  email TEXT,
+                 notes TEXT
+                )
+          ''')
+
+
+create_order_table()
+
+
+def order_data():
+    select_all_table = "SELECT * FROM ORDERS"
+    cursor = connect_database.execute(select_all_table)
+    results = cursor.fetchall()
+    print(results)
+
+
+print('orders database:')
+order_data()
+
+
+def update_table_rows_order():
+    delete_statement = 'DELETE FROM ORDERS WHERE rowid > (SELECT MIN(rowid) FROM ORDERS o2 WHERE ORDERS.email = ' \
+                       'o2.email AND ORDERS.id = o2.id); '
+    connect_database.execute(delete_statement)
+
+
+update_table_rows_order()
+
+
+def add_or_update_order_data():
+    sql_update = "INSERT OR REPLACE INTO ORDERS (status, email, notes) VALUES ('at hub', 'jfoo@email.com', 'cc') "
+
+    connect_database.execute(sql_update)
+
+
+add_or_update_order_data()
+
 connect_database.commit()
+#####################################################################################
 # Set file names for train and test data
 test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
 csv_train_file = os.path.join(test_data_dir, 'complaints_processed.csv')
@@ -318,8 +281,6 @@ mnb.fit(X_train, y_train)
 
 X_test_predict = mnb.predict(X_test)
 X_pred = mnb.predict(x_for)
-
-from sklearn.metrics import classification_report
 
 print(classification_report(y_test, X_test_predict))
 
@@ -484,12 +445,9 @@ for doc_id in range(len(test_corpus)):
 # Let's count how each document ranks with respect to the training corpus
 #
 # NB. Results vary between runs due to random seeding and very small corpus
-import collections
 
 counter = collections.Counter(ranks)
 print('this is ranking', counter)
-
-import random
 
 doc_id = random.randint(0, len(train_corpus) - 1)
 
@@ -537,9 +495,8 @@ for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2)
 #
 # If you'd like to know more about the subject matter of this tutorial, check out the links below.
 #
-# * `Word2Vec Paper <https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality.pdf>`_
-# * `Doc2Vec Paper <https://cs.stanford.edu/~quocle/paragraph_vector.pdf>`_
-# * `Dr. Michael D. Lee's Website <http://faculty.sites.uci.edu/mdlee>`_
-# * `Lee Corpus <http://faculty.sites.uci.edu/mdlee/similarity-data/>`__
-# * `IMDB Doc2Vec Tutorial <doc2vec-IMDB.ipynb>`_
+# * `Word2Vec Paper <https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their
+# -compositionality.pdf>`_ * `Doc2Vec Paper <https://cs.stanford.edu/~quocle/paragraph_vector.pdf>`_ * `Dr. Michael
+# D. Lee's Website <http://faculty.sites.uci.edu/mdlee>`_ * `Lee Corpus
+# <http://faculty.sites.uci.edu/mdlee/similarity-data/>`__ * `IMDB Doc2Vec Tutorial <doc2vec-IMDB.ipynb>`_
 #
