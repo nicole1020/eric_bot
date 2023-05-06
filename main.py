@@ -4,6 +4,7 @@
 """
 import logging
 import pickle
+from datetime import timedelta
 
 import smart_open
 from imblearn.over_sampling import SMOTE
@@ -168,9 +169,9 @@ order_data()
 
 
 # https://www.krazyprogrammer.com/2020/12/how-to-search-data-from-sqlite-in.html
-def order_number_search(orderID):
-    if orderID.get() != "":
-        cursor = connect_database.execute("SELECT * FROM ORDERS WHERE id LIKE ?", ('%' + str(orderID.get()) + '%',))
+def order_number_search(input):
+    if orderID != "":
+        cursor = connect_database.execute("SELECT * FROM ORDERS WHERE id = ?", ('%' + orderID + '%',))
         results = cursor.fetchall()
         print(results)
 
@@ -201,7 +202,7 @@ csv_test_file = os.path.join(test_data_dir, 'emails from Seattle Jewelry Company
 csv_tmp_file = os.path.join(test_data_dir, 'data_part_.csv')
 csv_test_result = os.path.join(test_data_dir, 'SJCompany.csv')
 
-pickle_save = os.path.join(test_data_dir, 'eric_model.sav')
+pickle_save = os.path.join(test_data_dir, 'eric_model.pkl')
 # issue with values
 # https://www.youtube.com/watch?v=OS2m0f2gVJ0
 missing_narrative = ['N/a', "Nan", "NaN", np.nan, "na", "Na", None]
@@ -262,6 +263,8 @@ stemmer = SnowballStemmer(language='english')
 stop_words = stopwords.words("english")
 
 
+# load pickle model
+model = pickle.load(open(pickle_save,'rb'))
 def tokenizer(text):
     token = [word for word in word_tokenize(text) if
              (len(word) > 3 and len(word.strip('Xx/')) > 2)]
@@ -297,23 +300,7 @@ print(classification_report(y_test, X_test_predict))
 
 
 ###############################################################################
-# Define a Function to Read and Preprocess Text
-# ---------------------------------------------
-#
-# Below, we define a function to:
-#
-# - open the train/test file (with latin encoding)
-# - read the file line-by-line
-# - pre-process each line (tokenize text into individual words, remove punctuation, set to lowercase, etc)
-#
-# The file we're reading is a **corpus**.
-# Each line of the file is a **document**.
-#
-# .. Important::
-#   To train the model, we'll need to associate a tag/number with each document
-#   of the training corpus. In our case, the tag is simply the zero-based line
-#   number.
-
+# read in text
 
 def read_corpus(file, tokens_only=False):
     with smart_open.open(file, encoding="iso-8859-1") as f:
@@ -329,66 +316,32 @@ def read_corpus(file, tokens_only=False):
 train_corpus = list(read_corpus(csv_tmp_file))
 test_corpus = list(read_corpus(csv_test_file))
 
-###############################################################################
-# Let's take a look at the training corpus
-#
+# Train corpus print
 print('this is train corpus', train_corpus[:2])
 
-###############################################################################
-# And the testing corpus looks like this:
-#
+# Test corpus print
 print('this is test corpus', test_corpus[:2])
 
-###############################################################################
-# Notice that the testing corpus is just a list of lists and does not contain
-# any tags.
-#
 
 ###############################################################################
-# Training the Model
-# ------------------
-#
-# Now, we'll instantiate a Doc2Vec model with a vector size with 50 dimensions and
-# iterating over the training corpus 40 times. We set the minimum word count to
-# 2 in order to discard words with very few occurrences. (Without a variety of
-# representative examples, retaining such infrequent words can often make a
-# model worse!) Typical iteration counts in the published `Paragraph Vector paper <https://cs.stanford.edu/~quocle/paragraph_vector.pdf>`__
-# results, using 10s-of-thousands to millions of docs, are 10-20. More
-# iterations take more time and eventually reach a point of diminishing
-# returns.
-#
-# However, this is a very very small dataset (300 documents) with shortish
-# documents (a few hundred words). Adding training passes can sometimes help
-# with such small datasets.
-# adding max_vocab_size=50000 to reduce memory issue and size=300
+# Train model
+# adding max_vocab_size=20000 to reduce memory issue
 # https://stackoverflow.com/questions/59050644/memoryerror-unable-to-allocate-array-with-shape-and-data-type-float32-while-usi
-model = gensim.models.doc2vec.Doc2Vec(vector_size=50, min_count=2, epochs=40, max_vocab_size=20000)
+#model = gensim.models.doc2vec.Doc2Vec(vector_size=50, min_count=2, epochs=40, max_vocab_size=20000)
 
 ###############################################################################
-# Build a vocabulary
-model.build_vocab(train_corpus)
+# build vocab
+#model.build_vocab(train_corpus)
 
 ###############################################################################
-# Essentially, the vocabulary is a list (accessible via
-# ``model.wv.index_to_key``) of all of the unique words extracted from the training corpus.
-# Additional attributes for each word are available using the ``model.wv.get_vecattr()`` method,
-# For example, to see how many times ``penalty`` appeared in the training corpus:
-#
+# check how often jewelry appears in train corpus
 print(f"Word 'jewelry' appeared {model.wv.get_vecattr('jewelry', 'count')} times in train corpus.")
 
 ###############################################################################
-# Next, train the model on the corpus.
-# In the usual case, where Gensim installation found a BLAS library for optimized
-# bulk vector operations, this training on this tiny 300 document, ~60k word corpus
-# should take just a few seconds. (More realistic datasets of tens-of-millions
-# of words or more take proportionately longer.) If for some reason a BLAS library
-# isn't available, training uses a fallback approach that takes 60x-120x longer,
-# so even this tiny training will take minutes rather than seconds. (And, in that
-# case, you should also notice a warning in the logging letting you know there's
-# something worth fixing.) So, be sure your installation uses the BLAS-optimized
-# Gensim if you value your time.
+# Train model
 #
-model.train(train_corpus, total_examples=model.corpus_count, epochs=model.epochs)
+#
+#model.train(train_corpus, total_examples=model.corpus_count, epochs=model.epochs)
 
 ###############################################################################
 # Now, we can use the trained model to infer a vector for any piece of text
@@ -401,7 +354,8 @@ vector = model.infer_vector(list_of_terms)
 print(list_of_terms)
 print(vector)
 
-pickle.dump(model, open(pickle_save, 'wb'))
+# pickle save model
+#pickle.dump(model, open(pickle_save, 'wb'))
 
 dc = DecisionTreeClassifier()
 dc1 = dc.fit(X_train, y_train)
@@ -418,30 +372,10 @@ dcs.fit(X_train, y_train)
 SVC(random_state=0)
 ConfusionMatrixDisplay.from_estimator(dcs, X_test, y_test)
 plt.show()
-###############################################################################
-# Note that ``infer_vector()`` does *not* take a string, but rather a list of
-# string tokens, which should have already been tokenized the same way as the
-# ``words`` property of original training document objects.
-#
-# Also note that because the underlying training/inference algorithms are an
-# iterative approximation problem that makes use of internal randomization,
-# repeated inferences of the same text will return slightly different vectors.
-#
 
-###############################################################################
-# Assessing the Model
-# -------------------
-#
-# To assess our new model, we'll first infer new vectors for each document of
-# the training corpus, compare the inferred vectors with the training corpus,
-# and then returning the rank of the document based on self-similarity.
-# Basically, we're pretending as if the training corpus is some new unseen data
-# and then seeing how they compare with the trained model. The expectation is
-# that we've likely overfit our model (i.e., all of the ranks will be less than
-# 2) and so we should be able to find similar documents very easily.
-# Additionally, we'll keep track of the second ranks for a comparison of less
-# similar documents.
-#
+
+# Assessment of model
+
 ranks = []
 second_ranks = []
 for doc_id in range(len(test_corpus)):
@@ -452,31 +386,28 @@ for doc_id in range(len(test_corpus)):
 
     second_ranks.append(sims[1])
 
-###############################################################################
-# Let's count how each document ranks with respect to the training corpus
-#
-# NB. Results vary between runs due to random seeding and very small corpus
+# document tank in train corpus
 
 counter = collections.Counter(ranks)
 print('this is ranking', counter)
 
 doc_id = random.randint(0, len(train_corpus) - 1)
 
-# Compare and print the second-most-similar document
+# Compare
 print('Train Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].words)))
 print('this is doc_id', doc_id)
 sim_id = random.randint(0, len(train_corpus) - 1)
 print('this is sim_id', sim_id)
 print('Similar Document {}: «{}»\n'.format(sim_id, ' '.join(train_corpus[sim_id].words)))
 
-# Pick a random document from the test corpus and infer a vector from the model testing model
+# Pick a random doc from test to compare
 doc_id2 = random.randint(0, len(test_corpus) - 1)
 print('this is docid2', doc_id2)
 inferred_vect = model.infer_vector(test_corpus[doc_id2].words)
 sims = model.dv.most_similar([inferred_vect], topn=len(model.dv))
 
 # added .words after 426 and 431.
-# Compare and print the most/median/the least similar documents from the train corpus
+# Compare to train corpus
 print('Test Document ({}): «{}»\n'.format(doc_id2, ' '.join(test_corpus[doc_id2].words)))
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
@@ -487,30 +418,8 @@ print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 ###############################################################################
-# Conclusion
-# ----------
-#
-# Let's review what we've seen in this tutorial:
-#
-# 0. Review the relevant models: bag-of-words, Word2Vec, Doc2Vec
-# 1. Load and preprocess the training and test corpora (see :ref:`core_concepts_corpus`)
-# 2. Train a Doc2Vec :ref:`core_concepts_model` model using the training corpus
-# 3. Demonstrate how the trained model can be used to infer a :ref:`core_concepts_vector`
-# 4. Assess the model
-# 5. Test the model on the test corpus
-#
-# That's it! Doc2Vec is a great way to explore relationships between documents.
-#
-# Additional Resources
-# --------------------
-#
-# If you'd like to know more about the subject matter of this tutorial, check out the links below.
-#
-# * `Word2Vec Paper <https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their
-# -compositionality.pdf>`_ * `Doc2Vec Paper <https://cs.stanford.edu/~quocle/paragraph_vector.pdf>`_ * `Dr. Michael
-# D. Lee's Website <http://faculty.sites.uci.edu/mdlee>`_ * `Lee Corpus
-# <http://faculty.sites.uci.edu/mdlee/similarity-data/>`__ * `IMDB Doc2Vec Tutorial <doc2vec-IMDB.ipynb>`_
-#
+###############################################################################
+
 
 if __name__ == '__main__':
     print("Computer Science Capstone C964 | Nicole Mau | nmau@wgu.edu | "
@@ -532,8 +441,10 @@ if __name__ == '__main__':
         elif option == "2":
             print("Please enter your order ID")
             orderID = input(" ")
-            searchresult = order_number_search(int(orderID))
-            print(searchresult)
+            order_info = order_data(orderID)
+            # set up order ID in instantiated order object, also customer object
+            #searchresult = order_number_search(orderID)
+            #print(searchresult)
 
         elif option == "3":
             print("Please enter your order ID")
@@ -544,7 +455,7 @@ if __name__ == '__main__':
             user_time_delta = timedelta(hours=int(h), minutes=int(m))
             # user_time = timedelta(user_time_delta).date()
 
-            getPackageDataTime(user_time_delta, user_id_request)
+            #getPackageDataTime(user_time_delta, user_id_request)
             # status = as delivered change from status/ take usertime and go through packages on truck and if at
             # 10:00 am and look at delivery time of 1st package and it's at 9
 
