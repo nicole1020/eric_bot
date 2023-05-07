@@ -425,8 +425,9 @@ if __name__ == '__main__':
         print("\nOptions:")
         print("1. Print All Orders in Table")
         print("2. Get a Single Order Status with ID")
-        print("3. Get a single Order Status with a Time")
-        print("4. Exit the Program")
+        print("3. Get all Customer Information")
+        print("4. Get single Customer Information")
+        print("5. Exit the Program")
         option = input("Chose an option (1,2,3, or 4): ")
         if option == "1":
             order_data()
@@ -441,17 +442,22 @@ if __name__ == '__main__':
 
 
         elif option == "3":
-            print("Please enter your customer id")
-            customer_id = input(" ")
+
+            cur = connect_database.cursor()
+            cur.execute("SELECT * FROM CUSTOMER ")
+            rows = cur.fetchall()
+
+        elif option == "4":
+
+            print("Please enter customer name")
+            customer_name = input(" ")
             print("Please enter your email")
             email_input = input(" ")
             cur = connect_database.cursor()
-            cur.execute("SELECT status FROM (  SELECT * FROM ORDERS UNION ALL SELECT email, name FROM CUSTOMERS) "
-                        "WHERE email = :email", (customer_id, email_input))
+            cur.execute("SELECT email FROM (  SELECT name, email FROM ORDERS UNION ALL SELECT name, email FROM CUSTOMER) "
+                        "WHERE email = :email", (customer_name, email_input))
             rows = cur.fetchall()
-
-
-        elif option == '4':
+        elif option == '5':
             isExit = False
         else:
             print("Invalid option, please try again!")
