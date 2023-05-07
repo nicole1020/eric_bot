@@ -142,6 +142,13 @@ print('customer database:')
 customer_data()
 
 
+def customer_specific(input):
+    select_customer = "SELECT * FROM CUSTOMER where email = ?"
+    cursor = connect_database.execute(select_customer, input)
+    results = cursor.fetchall()
+    print(results)
+
+
 def create_order_table():
     connect_database.execute('''   
                       CREATE TABLE IF NOT EXISTS ORDERS (
@@ -166,6 +173,14 @@ def order_data():
 
 print('orders database:')
 order_data()
+
+
+# specific order_data
+def order_data_specific(input):
+    select_order = "SELECT * FROM ORDERS where email = ?"
+    cursor = connect_database.execute(select_order, input)
+    results = cursor.fetchall()
+    print(results)
 
 
 # https://www.krazyprogrammer.com/2020/12/how-to-search-data-from-sqlite-in.html
@@ -436,27 +451,17 @@ if __name__ == '__main__':
         elif option == "2":
             print("Please enter your order ID")
             orderID = input(" ")
-            cur = connect_database.cursor()
-            cur.execute("SELECT * FROM ORDERS WHERE id=?", (orderID,))
-            rows = cur.fetchall()
-
+            order_data_specific(orderID)
+        # print all customer info
         elif option == "3":
 
-            cur = connect_database.cursor()
-            cur.execute("SELECT * FROM CUSTOMER ")
-            rows = cur.fetchall()
+            customer_data()
 
         elif option == "4":
 
-            print("Please enter customer name")
-            customer_name = input(" ")
             print("Please enter customer email")
             email_input = input(" ")
-            cur = connect_database.cursor()
-            cur.execute(
-                "SELECT email FROM (  SELECT name, email FROM ORDERS UNION ALL SELECT name, email FROM CUSTOMER) "
-                "WHERE email = :email_input", (customer_name, email_input))
-            rows = cur.fetchall()
+            customer_specific(email_input)
         elif option == '5':
             isExit = False
         else:
