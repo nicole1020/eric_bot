@@ -169,11 +169,6 @@ order_data()
 
 
 # https://www.krazyprogrammer.com/2020/12/how-to-search-data-from-sqlite-in.html
-def order_number_search(input):
-    if orderID != "":
-        cursor = connect_database.execute("SELECT * FROM ORDERS WHERE id = ?", ('%' + orderID + '%',))
-        results = cursor.fetchall()
-        print(results)
 
 
 def update_table_rows_order():
@@ -262,9 +257,10 @@ stemmer = SnowballStemmer(language='english')
 
 stop_words = stopwords.words("english")
 
-
 # load pickle model
-model = pickle.load(open(pickle_save,'rb'))
+model = pickle.load(open(pickle_save, 'rb'))
+
+
 def tokenizer(text):
     token = [word for word in word_tokenize(text) if
              (len(word) > 3 and len(word.strip('Xx/')) > 2)]
@@ -322,16 +318,15 @@ print('this is train corpus', train_corpus[:2])
 # Test corpus print
 print('this is test corpus', test_corpus[:2])
 
-
 ###############################################################################
 # Train model
 # adding max_vocab_size=20000 to reduce memory issue
 # https://stackoverflow.com/questions/59050644/memoryerror-unable-to-allocate-array-with-shape-and-data-type-float32-while-usi
-#model = gensim.models.doc2vec.Doc2Vec(vector_size=50, min_count=2, epochs=40, max_vocab_size=20000)
+# model = gensim.models.doc2vec.Doc2Vec(vector_size=50, min_count=2, epochs=40, max_vocab_size=20000)
 
 ###############################################################################
 # build vocab
-#model.build_vocab(train_corpus)
+# model.build_vocab(train_corpus)
 
 ###############################################################################
 # check how often jewelry appears in train corpus
@@ -341,7 +336,7 @@ print(f"Word 'jewelry' appeared {model.wv.get_vecattr('jewelry', 'count')} times
 # Train model
 #
 #
-#model.train(train_corpus, total_examples=model.corpus_count, epochs=model.epochs)
+# model.train(train_corpus, total_examples=model.corpus_count, epochs=model.epochs)
 
 ###############################################################################
 # Now, we can use the trained model to infer a vector for any piece of text
@@ -355,7 +350,7 @@ print(list_of_terms)
 print(vector)
 
 # pickle save model
-#pickle.dump(model, open(pickle_save, 'wb'))
+# pickle.dump(model, open(pickle_save, 'wb'))
 
 dc = DecisionTreeClassifier()
 dc1 = dc.fit(X_train, y_train)
@@ -372,7 +367,6 @@ dcs.fit(X_train, y_train)
 SVC(random_state=0)
 ConfusionMatrixDisplay.from_estimator(dcs, X_test, y_test)
 plt.show()
-
 
 # Assessment of model
 
@@ -437,27 +431,24 @@ if __name__ == '__main__':
         if option == "1":
             order_data()
 
-            # print("\nTotal miles traveled today: ", totalmiles)
+            # print order info from ID
         elif option == "2":
             print("Please enter your order ID")
             orderID = input(" ")
-            order_info = order_data(orderID)
-            # set up order ID in instantiated order object, also customer object
-            #searchresult = order_number_search(orderID)
-            #print(searchresult)
+            cur = connect_database.cursor()
+            cur.execute("SELECT * FROM ORDERS WHERE id=?", (orderID,))
+            rows = cur.fetchall()
+
 
         elif option == "3":
-            print("Please enter your order ID")
-            user_id_request = input(" ")
-            print("Please enter a time (HH:MM) for single package information:")
-            user_time_hours = input(" ")
-            h, m = user_time_hours.split(':')
-            user_time_delta = timedelta(hours=int(h), minutes=int(m))
-            # user_time = timedelta(user_time_delta).date()
-
-            #getPackageDataTime(user_time_delta, user_id_request)
-            # status = as delivered change from status/ take usertime and go through packages on truck and if at
-            # 10:00 am and look at delivery time of 1st package and it's at 9
+            print("Please enter your customer id")
+            customer_id = input(" ")
+            print("Please enter your email")
+            email_input = input(" ")
+            cur = connect_database.cursor()
+            cur.execute("SELECT status FROM (  SELECT * FROM ORDERS UNION ALL SELECT email, name FROM CUSTOMERS) "
+                        "WHERE email = :email", (customer_id, email_input))
+            rows = cur.fetchall()
 
 
         elif option == '4':
