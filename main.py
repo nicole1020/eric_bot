@@ -143,8 +143,6 @@ print('customer database:')
 customer_data()
 
 
-
-
 def create_order_table():
     connect_database.execute('''   
                       CREATE TABLE IF NOT EXISTS ORDERS (
@@ -169,7 +167,6 @@ def order_data():
 
 print('orders database:')
 order_data()
-
 
 
 # https://www.krazyprogrammer.com/2020/12/how-to-search-data-from-sqlite-in.html
@@ -365,8 +362,7 @@ print("Accuracy check:", metrics.accuracy_score(y_test, y_predict))
 # added tree plot and confusion matrix for display
 dc2 = tree.DecisionTreeClassifier(random_state=0)
 dcs2 = dc2.fit(X_train, y_train)
-tree.plot_tree(dcs2, fontsize= 2)
-
+tree.plot_tree(dcs2, fontsize=2)
 
 dcs = SVC(random_state=0)
 dcs.fit(X_train, y_train)
@@ -418,6 +414,7 @@ print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 ###############################################################################
+# user interface
 ###############################################################################
 
 
@@ -429,36 +426,39 @@ if __name__ == '__main__':
     isExit = True
     while isExit:
         print("\nOptions:")
-        print("1. Print All Orders in Table")
+        print("1. Print All Order Data")
         print("2. Get a Single Order Status with ID")
-        print("3. Get all Customer Information")
-        print("4. Get single Customer Information")
+        print("3. Get All Customer Data")
+        print("4. Get Single Customer/Order Information by email")
         print("5. Exit the Program")
         option = input("Chose an option (1,2,3,4, or 5): ")
-        if option == "1":
-            order_data()
+    # print all order data
+    if option == "1":
+        order_data()
 
-            # print order info from ID
-        elif option == "2":
-            print("Please enter your order ID")
-            orderID = input(" ")
-            cursor = connect_database.execute("SELECT * FROM ORDERS where id = ?", (orderID,))
-            results = cursor.fetchall()
-            print(results)
+        # print order info from ID
+    elif option == "2":
+        print("Please enter your order ID")
+        orderID = input(" ")
+        cursor = connect_database.execute("SELECT * FROM ORDERS where id = ?", (orderID,))
+        results = cursor.fetchall()
+        print(results)
 
-        # print all customer info
-        elif option == "3":
+    # print all customer data
+    elif option == "3":
 
-            customer_data()
+        customer_data()
+    # print specific customer/order data by email
+    elif option == "4":
 
-        elif option == "4":
-
-            print("Please enter customer email")
-            email_input = input(" ")
-            cursor = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input,))
-            results = cursor.fetchall()
-        elif option == '5':
-            isExit = False
-        else:
-            print("Invalid option, please try again!")
-        # main - END
+        print("Please enter customer email")
+        email_input = input(" ")
+        cursor = connect_database.execute("SELECT * FROM ORDERS AND CUSTOMER where ORDERS.email = ? AND "
+                                          "CUSTOMER.email = ? ", (email_input,))
+        results = cursor.fetchall()
+    # option to exit
+    elif option == '5':
+        isExit = False
+    else:
+        print("Invalid option, please try again!")
+    # main - END
