@@ -6,6 +6,7 @@ import logging
 import pickle
 from datetime import timedelta
 
+import sklearn
 import smart_open
 from imblearn.over_sampling import SMOTE
 from sklearn import metrics, tree
@@ -142,11 +143,6 @@ print('customer database:')
 customer_data()
 
 
-def customer_specific(input):
-    select_customer = "SELECT * FROM CUSTOMER where email = ?"
-    cursor = connect_database.execute(select_customer, input)
-    results = cursor.fetchall()
-    print(results)
 
 
 def create_order_table():
@@ -174,13 +170,6 @@ def order_data():
 print('orders database:')
 order_data()
 
-
-# specific order_data
-def order_data_specific(input):
-    select_order = "SELECT * FROM ORDERS where email = ?"
-    cursor = connect_database.execute("SELECT * FROM ORDERS where email = ?")
-    results = cursor.fetchall()
-    print(results)
 
 
 # https://www.krazyprogrammer.com/2020/12/how-to-search-data-from-sqlite-in.html
@@ -376,9 +365,7 @@ print("Accuracy check:", metrics.accuracy_score(y_test, y_predict))
 # added tree plot and confusion matrix for display
 dc2 = tree.DecisionTreeClassifier(random_state=0)
 dcs2 = dc2.fit(X_train, y_train)
-tree.plot_tree(dcs2)
-#pickle save tree
-pickle.dump(tree, open(pickle_save_tree, 'wb'))
+tree.plot_tree(dcs2, fontsize= 2)
 
 
 dcs = SVC(random_state=0)
@@ -455,7 +442,10 @@ if __name__ == '__main__':
         elif option == "2":
             print("Please enter your order ID")
             orderID = input(" ")
-            order_data_specific(orderID)
+            cursor = connect_database.execute("SELECT * FROM ORDERS where id = ?", (orderID,))
+            results = cursor.fetchall()
+            print(results)
+
         # print all customer info
         elif option == "3":
 
@@ -465,7 +455,8 @@ if __name__ == '__main__':
 
             print("Please enter customer email")
             email_input = input(" ")
-            customer_specific(email_input)
+            cursor = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input,))
+            results = cursor.fetchall()
         elif option == '5':
             isExit = False
         else:
