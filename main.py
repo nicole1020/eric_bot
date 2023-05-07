@@ -49,15 +49,32 @@ connect_database = sl.connect('my_test_customers.db')
 #
 
 # reset table to make it clean again
-# def clear_customer_data():
-#  delete_all = "DELETE FROM ORDERS"
-# connect_database.execute(delete_all)
+#def clear_customer_data():
+ #   delete_all = "DROP TABLE CUSTOMER"
+  #  connect_database.execute(delete_all)
 
 
-# clear_customer_data()
+#clear_customer_data()
+
+
+def clear_order_data():
+    delete_all = "DROP TABLE ORDERS"
+    connect_database.execute(delete_all)
+
+
+clear_order_data()
+
+
 # def add_customer_data():
-#   sql = 'INSERT INTO CUSTOMER( name, email, notes) values(?,?,?)'
-#    customer_table = [('John Doe', 'jdoe@email.com', 'order number 11'),
+#   sql = 'INSERT INTO CUSTOMER( name, email) values(?,?)'
+# edit jdoe order 28, 30, 31, 32
+# edit jhdoe order 29
+# edit katsu order 33
+# edit niece order 34
+# edit child order 35
+# edit mochi order 36
+#    customer_table =
+#    [('John Doe', 'jdoe@email.com', 'order number 11'),
 #             ('Johnny Doe', 'jhdoe@email.com', 'order number 12'),
 #              ('Jane Doe', 'jdoe@email.com', 'order number 13'),
 #               ('Janey Do', 'jdoe@email.com', 'order number 14'),
@@ -66,6 +83,17 @@ connect_database = sl.connect('my_test_customers.db')
 #                  ('M Niece', 'mniece@email.com', 'order number 17'),
 #                   ('A Child', 'achild@email.com', 'order number 18'),
 #                    ('Mochi Dog', 'mdog@email.com', 'order number 19')
+#                     ]
+# customer_table =
+#    [('John Doe', 'jdoe@email.com', 'order number 28, 30, 31, 32'),
+#             ('Johnny Doe', 'jhdoe@email.com', 'order number 29'),
+#              ('Jane Doe', 'jedoe@email.com', 'order number 14'),
+#               ('Janey Do', 'jydoe@email.com', 'order number 14'),
+#                ('Joey Doe', 'jodoe@email.com', 'order number 15'),
+#                 ('Katsu Dog', 'kdog@email.com', 'order number 33'),
+#                  ('M Niece', 'mniece@email.com', 'order number 34'),
+#                   ('A Child', 'achild@email.com', 'order number 35'),
+#                    ('Mochi Dog', 'mdog@email.com', 'order number 36')
 #                     ]
 
 #    connect_database.executemany(sql, customer_table)
@@ -99,20 +127,45 @@ def create_customer_table():
                  id INTEGER NOT NULL
         PRIMARY KEY AUTOINCREMENT,
                name TEXT,
-              email TEXT,
-             notes TEXT
-            )
+              email TEXT)
       ''')
 
 
 create_customer_table()
 
 
-# use this to update OR add new customer specific ones can add later with UI
+def add_customer_data():
+    sql = 'INSERT INTO CUSTOMER( name, email) values(?,?)'
+    customer_table = [('John Doe', 'jdoe@email.com'),
+                      ('Johnny Doe', 'jhdoe@email.com'),
+                      ('Jane Doe', 'jedoe@email.com'),
+                      ('Janey Do', 'jydoe@email.com'),
+                      ('Joey Doe', 'jodoe@email.com'),
+                      ('Katsu Dog', 'kdog@email.com'),
+                      ('M Niece', 'mniece@email.com'),
+                      ('A Child', 'achild@email.com'),
+                      ('Mochi Dog', 'mdog@email.com')
+                      ]
+    connect_database.executemany(sql, customer_table)
 
+
+add_customer_data()
+
+
+# use this to update OR add new customer specific ones can add later with UI
+# updated_customer_table =
+#    [('John Doe', 'jdoe@email.com', 'order number 28, 30, 31, 32'),
+#             ('Johnny Doe', 'jhdoe@email.com', 'order number 29'),
+#              ('Jane Doe', 'jedoe@email.com', 'order number 14'),
+#               ('Janey Do', 'jydoe@email.com', 'order number 14'),
+#                ('Joey Doe', 'jodoe@email.com', 'order number 15'),
+#                 ('Katsu Dog', 'kdog@email.com', 'order number 33'),
+#                  ('M Niece', 'mniece@email.com', 'order number 34'),
+#                   ('A Child', 'achild@email.com', 'order number 35'),
+#                    ('Mochi Dog', 'mdog@email.com', 'order number 36')
+#                     ]
 def add_or_update_customer_data():
-    sql_update = "INSERT OR REPLACE INTO CUSTOMER (name, email, notes) VALUES ('John Foo', 'jfoo@email.com', " \
-                 "'order number 20') "
+    sql_update = "INSERT OR REPLACE INTO CUSTOMER (name, email) VALUES ('John Doe', 'jdoe@email.com') "
 
     connect_database.execute(sql_update)
 
@@ -460,10 +513,12 @@ if __name__ == '__main__':
         elif option == "4":
             print("Please enter customer email")
             email_input = input(" ")
-            cursor = connect_database.execute("SELECT * FROM ORDERS where ORDERS.email = ? ", (email_input,))
-            c2 = connect_database.execute("SELECT * FROM CUSTOMER where CUSTOMER.email = ? ", (email_input,))
+            cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input,))
             results = cursor.fetchall()
+            print(results)
+            c2 = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input,))
             result = c2.fetchall()
+            print(result)
         # option to exit
         elif option == '5':
             isExit = False
