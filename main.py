@@ -178,7 +178,7 @@ order_data()
 # specific order_data
 def order_data_specific(input):
     select_order = "SELECT * FROM ORDERS where email = ?"
-    cursor = connect_database.execute(select_order, input)
+    cursor = connect_database.execute("SELECT * FROM ORDERS where email = ?")
     results = cursor.fetchall()
     print(results)
 
@@ -213,6 +213,7 @@ csv_tmp_file = os.path.join(test_data_dir, 'data_part_.csv')
 csv_test_result = os.path.join(test_data_dir, 'SJCompany.csv')
 
 pickle_save = os.path.join(test_data_dir, 'eric_model.pkl')
+pickle_save_tree = os.path.join(test_data_dir, 'eric_model_tree.pkl')
 # issue with values
 # https://www.youtube.com/watch?v=OS2m0f2gVJ0
 missing_narrative = ['N/a', "Nan", "NaN", np.nan, "na", "Na", None]
@@ -372,10 +373,13 @@ dc1 = dc.fit(X_train, y_train)
 y_predict = dc.predict(X_test)
 print("Accuracy check:", metrics.accuracy_score(y_test, y_predict))
 
+# added tree plot and confusion matrix for display
 dc2 = tree.DecisionTreeClassifier(random_state=0)
 dcs2 = dc2.fit(X_train, y_train)
 tree.plot_tree(dcs2)
-# added tree plot and confusion matrix for display
+#pickle save tree
+pickle.dump(tree, open(pickle_save_tree, 'wb'))
+
 
 dcs = SVC(random_state=0)
 dcs.fit(X_train, y_train)
