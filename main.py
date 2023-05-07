@@ -181,6 +181,7 @@ def update_table_rows_order():
 update_table_rows_order()
 
 
+# change line if need to update/insert
 def add_or_update_order_data():
     sql_update = "INSERT OR REPLACE INTO ORDERS (status, email, notes) VALUES ('at hub', 'jfoo@email.com', 'cc') "
 
@@ -189,6 +190,13 @@ def add_or_update_order_data():
 
 add_or_update_order_data()
 
+
+def delete_extra_entries():
+    swl = "DELETE FROM ORDERS WHERE email LIKE 'jfoo@email.com'"
+    connect_database.execute(swl)
+
+
+delete_extra_entries()
 connect_database.commit()
 #####################################################################################
 # Set file names for train and test data
@@ -427,38 +435,38 @@ if __name__ == '__main__':
     while isExit:
         print("\nOptions:")
         print("1. Print All Order Data")
-        print("2. Get a Single Order Status with ID")
-        print("3. Get All Customer Data")
-        print("4. Get Single Customer/Order Information by email")
+        print("2. Get a Specific Order Status with ID")
+        print("3. Get all Customer Data")
+        print("4. Get Specific Customer/order Information by email")
         print("5. Exit the Program")
         option = input("Chose an option (1,2,3,4, or 5): ")
-    # print all order data
-    if option == "1":
-        order_data()
+        # print all order data
+        if option == "1":
+            order_data()
 
-        # print order info from ID
-    elif option == "2":
-        print("Please enter your order ID")
-        orderID = input(" ")
-        cursor = connect_database.execute("SELECT * FROM ORDERS where id = ?", (orderID,))
-        results = cursor.fetchall()
-        print(results)
+            # print order info from specific order ID
+        elif option == "2":
+            print("Please enter your order ID")
+            orderID = input(" ")
+            cursor = connect_database.execute("SELECT * FROM ORDERS where id = ?", (orderID,))
+            results = cursor.fetchall()
+            print(results)
 
-    # print all customer data
-    elif option == "3":
+        # print all customer data
+        elif option == "3":
 
-        customer_data()
-    # print specific customer/order data by email
-    elif option == "4":
-
-        print("Please enter customer email")
-        email_input = input(" ")
-        cursor = connect_database.execute("SELECT * FROM ORDERS AND CUSTOMER where ORDERS.email = ? AND "
-                                          "CUSTOMER.email = ? ", (email_input,))
-        results = cursor.fetchall()
-    # option to exit
-    elif option == '5':
-        isExit = False
-    else:
-        print("Invalid option, please try again!")
-    # main - END
+            customer_data()
+        # print specific order data by email
+        elif option == "4":
+            print("Please enter customer email")
+            email_input = input(" ")
+            cursor = connect_database.execute("SELECT * FROM ORDERS where ORDERS.email = ? ", (email_input,))
+            c2 = connect_database.execute("SELECT * FROM CUSTOMER where CUSTOMER.email = ? ", (email_input,))
+            results = cursor.fetchall()
+            result = c2.fetchall()
+        # option to exit
+        elif option == '5':
+            isExit = False
+        else:
+            print("Invalid option, please try again!")
+        # main - END
