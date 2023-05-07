@@ -440,7 +440,6 @@ if __name__ == '__main__':
             cur.execute("SELECT * FROM ORDERS WHERE id=?", (orderID,))
             rows = cur.fetchall()
 
-
         elif option == "3":
 
             cur = connect_database.cursor()
@@ -451,11 +450,12 @@ if __name__ == '__main__':
 
             print("Please enter customer name")
             customer_name = input(" ")
-            print("Please enter your email")
+            print("Please enter customer email")
             email_input = input(" ")
             cur = connect_database.cursor()
-            cur.execute("SELECT email FROM (  SELECT name, email FROM ORDERS UNION ALL SELECT name, email FROM CUSTOMER) "
-                        "WHERE email = :email", (customer_name, email_input))
+            cur.execute(
+                "SELECT email FROM (  SELECT name, email FROM ORDERS UNION ALL SELECT name, email FROM CUSTOMER) "
+                "WHERE email = :email_input", (customer_name, email_input))
             rows = cur.fetchall()
         elif option == '5':
             isExit = False
