@@ -434,7 +434,7 @@ if __name__ == '__main__':
         print("3. Get all Customer Information")
         print("4. Get single Customer Information")
         print("5. Exit the Program")
-        option = input("Chose an option (1,2,3, or 4): ")
+        option = input("Chose an option (1,2,3,4, or 5): ")
         if option == "1":
             order_data()
 
