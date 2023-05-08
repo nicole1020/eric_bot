@@ -33,7 +33,7 @@ import tkinter.ttk as ttk
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-# create sqllite sql database for future sensitive customer data
+# create sqllite sql database for future sensitive customer data live/practical application would have a separate server for customer data
 
 connect_database = sl.connect('my_test_customers.db')
 
@@ -48,13 +48,13 @@ connect_database = sl.connect('my_test_customers.db')
 # https://stackoverflow.com/questions/53128279/how-to-print-output-from-sqlite3-in-python
 #
 
-# reset table to make it clean again
-#def clear_customer_data():
- #   delete_all = "DROP TABLE CUSTOMER"
-  #  connect_database.execute(delete_all)
+
+def clear_customer_data():
+    delete_all = "DROP TABLE CUSTOMER"
+    connect_database.execute(delete_all)
 
 
-#clear_customer_data()
+# clear_customer_data()
 
 
 def clear_order_data():
@@ -62,63 +62,10 @@ def clear_order_data():
     connect_database.execute(delete_all)
 
 
-clear_order_data()
+# clear_order_data()
 
 
-# def add_customer_data():
-#   sql = 'INSERT INTO CUSTOMER( name, email) values(?,?)'
-# edit jdoe order 28, 30, 31, 32
-# edit jhdoe order 29
-# edit katsu order 33
-# edit niece order 34
-# edit child order 35
-# edit mochi order 36
-#    customer_table =
-#    [('John Doe', 'jdoe@email.com', 'order number 11'),
-#             ('Johnny Doe', 'jhdoe@email.com', 'order number 12'),
-#              ('Jane Doe', 'jdoe@email.com', 'order number 13'),
-#               ('Janey Do', 'jdoe@email.com', 'order number 14'),
-#                ('Joey Doe', 'jdoe@email.com', 'order number 15'),
-#                 ('Katsu Dog', 'kdog@email.com', 'order number 16'),
-#                  ('M Niece', 'mniece@email.com', 'order number 17'),
-#                   ('A Child', 'achild@email.com', 'order number 18'),
-#                    ('Mochi Dog', 'mdog@email.com', 'order number 19')
-#                     ]
-# customer_table =
-#    [('John Doe', 'jdoe@email.com', 'order number 28, 30, 31, 32'),
-#             ('Johnny Doe', 'jhdoe@email.com', 'order number 29'),
-#              ('Jane Doe', 'jedoe@email.com', 'order number 14'),
-#               ('Janey Do', 'jydoe@email.com', 'order number 14'),
-#                ('Joey Doe', 'jodoe@email.com', 'order number 15'),
-#                 ('Katsu Dog', 'kdog@email.com', 'order number 33'),
-#                  ('M Niece', 'mniece@email.com', 'order number 34'),
-#                   ('A Child', 'achild@email.com', 'order number 35'),
-#                    ('Mochi Dog', 'mdog@email.com', 'order number 36')
-#                     ]
 
-#    connect_database.executemany(sql, customer_table)
-
-
-# add_customer_data()
-
-
-# def add_order_data():
-# sql = 'INSERT INTO ORDERS( status, email, notes) values(?,?,?)'
-# order_table = [('en-route', 'jdoe@email.com', 'cc'),
-#         ('pending', 'jhdoe@email.com', 'cc'),
-#          ('at hub', 'jdoe@email.com', 'wire'),
-#           ('pending', 'jdoe@email.com', 'cc'),
-#             ('delayed', 'jdoe@email.com', 'cc'),
-#             ('delivered', 'kdog@email.com', 'cc'),
-#              ('delivered', 'mniece@email.com', 'cc'),
-#               ('delivered', 'achild@email.com', 'cc'),
-#                ('delivered', 'mdog@email.com', 'cc')
-#                 ]
-
-#   connect_database.executemany(sql, order_table)
-
-
-# add_order_data()
 ###############################################################################
 
 def create_customer_table():
@@ -149,21 +96,9 @@ def add_customer_data():
     connect_database.executemany(sql, customer_table)
 
 
-add_customer_data()
+# add_customer_data()
 
 
-# use this to update OR add new customer specific ones can add later with UI
-# updated_customer_table =
-#    [('John Doe', 'jdoe@email.com', 'order number 28, 30, 31, 32'),
-#             ('Johnny Doe', 'jhdoe@email.com', 'order number 29'),
-#              ('Jane Doe', 'jedoe@email.com', 'order number 14'),
-#               ('Janey Do', 'jydoe@email.com', 'order number 14'),
-#                ('Joey Doe', 'jodoe@email.com', 'order number 15'),
-#                 ('Katsu Dog', 'kdog@email.com', 'order number 33'),
-#                  ('M Niece', 'mniece@email.com', 'order number 34'),
-#                   ('A Child', 'achild@email.com', 'order number 35'),
-#                    ('Mochi Dog', 'mdog@email.com', 'order number 36')
-#                     ]
 def add_or_update_customer_data():
     sql_update = "INSERT OR REPLACE INTO CUSTOMER (name, email) VALUES ('John Doe', 'jdoe@email.com') "
 
@@ -209,6 +144,26 @@ def create_order_table():
 
 
 create_order_table()
+
+
+# use this to update OR add new customer specific ones can add later with UI
+def add_order_data():
+    sql = 'INSERT INTO ORDERS( status, email, notes) values(?,?,?)'
+    updated_order_table = [('en-route', 'jdoe@email.com', 'cc'),
+                           ('pending', 'jhdoe@email.com', 'cc'),
+                           ('at hub', 'jdoe@email.com', 'wire'),
+                           ('pending', 'jdoe@email.com', 'cc'),
+                           ('delayed', 'jdoe@email.com', 'cc'),
+                           ('delivered', 'kdog@email.com', 'cc'),
+                           ('delivered', 'mniece@email.com', 'cc'),
+                           ('delivered', 'achild@email.com', 'cc'),
+                           ('delivered', 'mdog@email.com', 'cc')
+                           ]
+
+    connect_database.executemany(sql, updated_order_table)
+
+
+# add_order_data()
 
 
 def order_data():
@@ -474,8 +429,14 @@ print('Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].wor
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
+
+
+#check here if email exists- if order exists- and if it does auto reply based on incoming email.
+def customer_email_check():
+
+
 ###############################################################################
-# user interface
+############################# GUI #############################################
 ###############################################################################
 
 
@@ -515,10 +476,10 @@ if __name__ == '__main__':
             email_input = input(" ")
             cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input,))
             results = cursor.fetchall()
-            print(results)
+            print("Order information for selected email:", results)
             c2 = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input,))
             result = c2.fetchall()
-            print(result)
+            print("Customer information for email address:", result)
         # option to exit
         elif option == '5':
             isExit = False
