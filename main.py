@@ -2,6 +2,7 @@
 "Computer Science Capstone C964 | Nicole Mau | nmau@wgu.edu | "
           "001336361 | eric_bot | email response in corporations"
 """
+import csv
 import logging
 import pickle
 from datetime import timedelta
@@ -63,7 +64,6 @@ def clear_order_data():
 
 
 # clear_order_data()
-
 
 
 ###############################################################################
@@ -215,7 +215,6 @@ csv_tmp_file = os.path.join(test_data_dir, 'data_part_.csv')
 csv_test_result = os.path.join(test_data_dir, 'SJCompany.csv')
 
 pickle_save = os.path.join(test_data_dir, 'eric_model.pkl')
-pickle_save_tree = os.path.join(test_data_dir, 'eric_model_tree.pkl')
 # issue with values
 # https://www.youtube.com/watch?v=OS2m0f2gVJ0
 missing_narrative = ['N/a', "Nan", "NaN", np.nan, "na", "Na", None]
@@ -430,15 +429,14 @@ print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
-
-#check here if email exists- if order exists- and if it does auto reply based on incoming email.
-def customer_email_check():
+# check here if email exists- if order exists- and if it does auto reply based on incoming email (option 4 expanded in GUI)
+# def customer_email_check():
 
 
 ###############################################################################
 ############################# GUI #############################################
 ###############################################################################
-
+print("###############################################################################")
 
 if __name__ == '__main__':
     print("Computer Science Capstone C964 | Nicole Mau | nmau@wgu.edu | "
@@ -474,12 +472,22 @@ if __name__ == '__main__':
         elif option == "4":
             print("Please enter customer email")
             email_input = input(" ")
-            cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input,))
-            results = cursor.fetchall()
-            print("Order information for selected email:", results)
             c2 = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input,))
             result = c2.fetchall()
             print("Customer information for email address:", result)
+            cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input,))
+            results = cursor.fetchall()
+            print("Order information for selected email:", results)
+
+# https://stackoverflow.com/questions/17308872/check-whether-string-is-in-csv
+
+            with open(csv_test_file, 'rt') as f:
+                reader = csv.reader(f, delimiter=',')
+                for row in reader:
+                    if email_input in row:
+                        print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
+                        print("\nrows of data for given email:", row)
+                        #if email not in file- prompt customer to respond with email used to place order
         # option to exit
         elif option == '5':
             isExit = False
