@@ -63,7 +63,7 @@ def clear_order_data():
     connect_database.execute(delete_all)
 
 
-# clear_order_data()
+#clear_order_data()
 
 
 ###############################################################################
@@ -138,7 +138,8 @@ def create_order_table():
             PRIMARY KEY AUTOINCREMENT,
                     status TEXT,
                   email TEXT,
-                 notes TEXT
+                 notes TEXT,
+                 product TEXT
                 )
           ''')
 
@@ -146,24 +147,31 @@ def create_order_table():
 create_order_table()
 
 
+def add_column_order():
+    connect_database.execute("ALTER TABLE ORDERS ADD product TEXT")
+
+
+#add_column_order()
+
+
 # use this to update OR add new customer specific ones can add later with UI
 def add_order_data():
-    sql = 'INSERT INTO ORDERS( status, email, notes) values(?,?,?)'
-    updated_order_table = [('en-route', 'jdoe@email.com', 'cc'),
-                           ('pending', 'jhdoe@email.com', 'cc'),
-                           ('at hub', 'jdoe@email.com', 'wire'),
-                           ('pending', 'jdoe@email.com', 'cc'),
-                           ('delayed', 'jdoe@email.com', 'cc'),
-                           ('delivered', 'kdog@email.com', 'cc'),
-                           ('delivered', 'mniece@email.com', 'cc'),
-                           ('delivered', 'achild@email.com', 'cc'),
-                           ('delivered', 'mdog@email.com', 'cc')
+    sql = 'INSERT INTO ORDERS( status, email, notes, product) values(?,?,?,?)'
+    updated_order_table = [('en-route', 'jdoe@email.com', 'cc', 'earrings'),
+                           ('pending', 'jhdoe@email.com', 'cc', 'ring'),
+                           ('at hub', 'jdoe@email.com', 'wire', 'necklace'),
+                           ('pending', 'jdoe@email.com', 'cc', 'bracelet'),
+                           ('delayed', 'jdoe@email.com', 'cc', 'ring'),
+                           ('delivered', 'kdog@email.com', 'cc', 'brooch'),
+                           ('delivered', 'mniece@email.com', 'cc', 'necklace'),
+                           ('delivered', 'achild@email.com', 'cc', 'ring'),
+                           ('delivered', 'mdog@email.com', 'cc', 'ring')
                            ]
 
     connect_database.executemany(sql, updated_order_table)
 
 
-# add_order_data()
+add_order_data()
 
 
 def order_data():
@@ -479,7 +487,7 @@ if __name__ == '__main__':
             results = cursor.fetchall()
             print("Order information for selected email:", results)
 
-# https://stackoverflow.com/questions/17308872/check-whether-string-is-in-csv
+            # https://stackoverflow.com/questions/17308872/check-whether-string-is-in-csv
 
             with open(csv_test_file, 'rt') as f:
                 reader = csv.reader(f, delimiter=',')
@@ -487,7 +495,7 @@ if __name__ == '__main__':
                     if email_input in row:
                         print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
                         print("\nrows of data for given email:", row)
-                        #if email not in file- prompt customer to respond with email used to place order
+                        # if email not in file- prompt customer to respond with email used to place order
         # option to exit
         elif option == '5':
             isExit = False
