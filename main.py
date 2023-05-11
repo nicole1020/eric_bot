@@ -214,15 +214,31 @@ def delete_extra_entries():
 
 delete_extra_entries()
 connect_database.commit()
+
 #####################################################################################
-# Set file names for train and test data
+#####################################################################################
+
+
+
+# Set file names for train and test data data import from CSV
 test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
+
+#kaggle dataset customer complaints
 csv_train_file = os.path.join(test_data_dir, 'complaints_processed.csv')
+
+# created pseudo customer emails (the most common emails)
 csv_test_file = os.path.join(test_data_dir, 'emails from Seattle Jewelry Company.csv')
+
+# cleaned data for naiive bayes and doc2vec analysis
 csv_tmp_file = os.path.join(test_data_dir, 'data_part_.csv')
+
+
 csv_test_result = os.path.join(test_data_dir, 'SJCompany.csv')
 
+#saved model (saves 15 minutes of training time)
 pickle_save = os.path.join(test_data_dir, 'eric_model.pkl')
+
+
 # issue with values
 # https://www.youtube.com/watch?v=OS2m0f2gVJ0
 missing_narrative = ['N/a', "Nan", "NaN", np.nan, "na", "Na", None]
@@ -230,8 +246,7 @@ missing_narrative = ['N/a', "Nan", "NaN", np.nan, "na", "Na", None]
 # needed to ignore first column (importing duplicate first col)
 # https://www.statology.org/pandas-read-csv-ignore-first-column/
 
-# print('this is csv_tmp_file', csv_tmp_file)
-
+#read csv in chunks and put into a clean csv file for analysis
 df_iterator = pd.read_csv(
     csv_train_file,
     chunksize=10000)
@@ -249,43 +264,65 @@ for i, df_chunk in enumerate(df_iterator):
         header=header,
         mode=mode)
 
+# dataframe df initialized
 df = pd.read_csv(csv_tmp_file)
+
+#expand column widths
 pd.set_option('display.max_colwidth', None)
-plt.show()
+
+
 print(df)
+
+#show value counts
 print(df['product'].value_counts())
+
+#remove null values
 print(df.isnull().sum())
 print(df.isnull().any())
+
 # display NaN values and product number
 nan_values = df[df['narrative'].isna()]
+
+#show nan values
 print(nan_values)
+
 # drop wasn't working, needed to add parameter
 # https://stackoverflow.com/questions/49712002/pandas-dropna-function-not-working
 df.dropna(inplace=True)
 
+#print out dataframe value counts making sure nan values were dropped
 df['product'].value_counts().plot(kind='bar')
+
+#bar plot labels and label orientation fixed (visual #1)
 plt.bar(x='product', height=3.0, width=3.0)
 plt.xticks(rotation=10)
 plt.title('Email Description Counts')
 plt.show()
 
-# check if drop worked
+# initialized dataframe complaints_dataframe for analysis by ML algorithms
 complaints_dataframe = df[['product', 'narrative']]
+
+#search for these terms and will use these for prediction and analysis later
 search_terms = {'credit_reporting': 0, 'debt_collection': 1, 'mortgages_and_loans': 2, 'credit_card': 3,
                 'retail_banking': 4
                 }
 
+# show value counts by product
 print(complaints_dataframe['product'].value_counts())
 
+# map search terms to products
 complaints_dataframe['search_terms'] = complaints_dataframe['product'].map(search_terms)
+
+# stemmer
 stemmer = SnowballStemmer(language='english')
 
+# stop words
 stop_words = stopwords.words("english")
 
-# load pickle model
+# load pickle model (saved model)
 model = pickle.load(open(pickle_save, 'rb'))
 
-
+# tokenizer - removes words less than 2 and ignores Xx
 def tokenizer(text):
     token = [word for word in word_tokenize(text) if
              (len(word) > 3 and len(word.strip('Xx/')) > 2)]
@@ -294,34 +331,50 @@ def tokenizer(text):
     return stem
 
 
+# vectorizer
 vectorize = TfidfVectorizer(analyzer=tokenizer)
+
+# sets narrative to tfidf vectorizer
 x_for = vectorize.fit_transform(df['narrative'][:10000].values.astype('U'))
 
+# expand column size
 pd.set_option('display.max_colwidth', None)
+
+# use SMOTE for irregularly shaped data types
 x_sm, y_sm = SMOTE().fit_resample(x_for, df['product'][:10000])
-# X, y = make_classification(random_state=0)
+
+# initialize x and y train and test
 X_train, X_test, y_train, y_test = train_test_split(x_sm, y_sm, test_size=0.3, random_state=0)
+
+#checking shapes of each and theyre irregular- need SMOTE to fix
+# issue with fit here
+# https://www.geeksforgeeks.org/ml-handling-imbalanced-data-with-smote-and-near-miss-algorithm-in-python/
+# followed SMOTE guide because i ran into an error with size of data differences.
+
 print('this is xtrain', X_train.shape)
 print('this is xtest', X_test.shape)
 print('this is y_train', y_train.shape)
 print('this is y_test', y_test.shape)
 
-# issue with fit here
-# https://www.geeksforgeeks.org/ml-handling-imbalanced-data-with-smote-and-near-miss-algorithm-in-python/
-# followed SMOTE guide because i ran into an error with size of data differences.
 
+# send data through multinomial naiive bayes algorithm
 mnb = MultinomialNB()
 
+#fit data to naiive bayes
 mnb.fit(X_train, y_train)
 
+#predict outcomes
 X_test_predict = mnb.predict(X_test)
 X_pred = mnb.predict(x_for)
 
+#check classification
 print(classification_report(y_test, X_test_predict))
 
+#check accuracy
+print('MNB accuracy score: ', mnb.score(X_train, y_train))
 
 ###############################################################################
-# read in text
+# read in text for doc2vec
 
 def read_corpus(file, tokens_only=False):
     with smart_open.open(file, encoding="iso-8859-1") as f:
@@ -333,8 +386,10 @@ def read_corpus(file, tokens_only=False):
                 # For training data, add tags
                 yield gensim.models.doc2vec.TaggedDocument(tokens, [i])
 
-
+#train with kaggle dataset
 train_corpus = list(read_corpus(csv_tmp_file))
+
+#test with seattle jewelry company customer emails
 test_corpus = list(read_corpus(csv_test_file))
 
 # Train corpus print
@@ -364,10 +419,8 @@ print(f"Word 'jewelry' appeared {model.wv.get_vecattr('jewelry', 'count')} times
 # model.train(train_corpus, total_examples=model.corpus_count, epochs=model.epochs)
 
 ###############################################################################
-# Now, we can use the trained model to infer a vector for any piece of text
-# by passing a list of words to the ``model.infer_vector`` function. This
-# vector can then be compared with other vectors via cosine similarity.
-#
+# check trained model for terms as vectors
+
 list_of_terms = ['jewelry', 'pearls', 'necklace', 'earrings', 'gemstone']
 # introductory- will expand terms in real life data with 'order status', 'exchange', 'return', 'refund'
 vector = model.infer_vector(list_of_terms)
@@ -377,9 +430,12 @@ print(vector)
 # pickle save model
 # pickle.dump(model, open(pickle_save, 'wb'))
 
+# 2nd visual aide, Decision tree classifier
 dc = DecisionTreeClassifier()
 dc1 = dc.fit(X_train, y_train)
 y_predict = dc.predict(X_test)
+
+#check accuracy of decision tree
 print("Accuracy check:", metrics.accuracy_score(y_test, y_predict))
 
 # added tree plot and confusion matrix for display
@@ -390,10 +446,11 @@ tree.plot_tree(dcs2, fontsize=2)
 dcs = SVC(random_state=0)
 dcs.fit(X_train, y_train)
 SVC(random_state=0)
+#3rd visual aide confusion matrix display
 ConfusionMatrixDisplay.from_estimator(dcs, X_test, y_test)
 plt.show()
 
-# Assessment of model
+# Assessment of model ranking test vs train data
 
 ranks = []
 second_ranks = []
@@ -429,16 +486,22 @@ sims = model.dv.most_similar([inferred_vect], topn=len(model.dv))
 # Compare to train corpus
 print('Test Document ({}): «{}»\n'.format(doc_id2, ' '.join(test_corpus[doc_id2].words)))
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
-for label, index in [('MOST', 0), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
+for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
+#check to see if model agrees
 print('Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].words)))
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
-# check here if email exists- if order exists- and if it does auto reply based on incoming email (option 4 expanded in GUI)
-# def customer_email_check():
+# check here for product. If new product is launching and customer has bought in past. Send email
+def customer_product_check():
+
+
+
+
+
 
 
 ###############################################################################
@@ -495,7 +558,7 @@ if __name__ == '__main__':
                     if email_input in row:
                         print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
                         print("\nrows of data for given email:", row)
-                        # if email not in file- prompt customer to respond with email used to place order
+                        # if email not in file-prompt customer to respond with email used to place order
         # option to exit
         elif option == '5':
             isExit = False
