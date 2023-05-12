@@ -19,7 +19,7 @@ pandas 2.0.0
 
 Pillow 9.5.0
 
-pip 21.3.1
+pip 23.1.2 
 
 scikit_learn 1.2.2
 
