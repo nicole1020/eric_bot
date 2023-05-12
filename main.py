@@ -1,7 +1,4 @@
-"""
-"Computer Science Capstone C964 | Nicole Mau | nmau@wgu.edu | "
-          "001336361 | eric_bot | email response in corporations"
-"""
+"""Computer Science Capstone C964 | Nicole Mau | nmau@wgu.edu | 001336361 | eric_bot | email response in corporations"""
 import csv
 import logging
 import pickle
@@ -32,9 +29,20 @@ import random
 from tkinter import *
 import tkinter.ttk as ttk
 
+from email_helper import send_message
+
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-# create sqllite sql database for future sensitive customer data live/practical application would have a separate server for customer data
+# I want a version of this email every x amount of time. Will use this function timer
+# https://realpython.com/python-timer/
+# if customer placed order recently (similar items)
+# if customer has not placed order recently
+# if customers have sent similar emails - send escalation email or notice out.
+print('this email here:')
+send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com", "test", "this is a tesst", user_id='me')
+
+# create sqllite sql database for future sensitive customer data live/practical application would have a separate
+# server for customer data
 
 connect_database = sl.connect('my_test_customers.db')
 
@@ -51,58 +59,72 @@ connect_database = sl.connect('my_test_customers.db')
 
 
 def clear_customer_data():
-    delete_all = "DROP TABLE CUSTOMER"
-    connect_database.execute(delete_all)
+    try:
+        delete_all = "DROP TABLE CUSTOMER"
+        connect_database.execute(delete_all)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 # clear_customer_data()
 
 
 def clear_order_data():
-    delete_all = "DROP TABLE ORDERS"
-    connect_database.execute(delete_all)
+    try:
+        delete_all = "DELETE FROM ORDERS WHERE id IN (11, 12, 13, 14, 15, 16 ,17, 18,19);"
+        connect_database.execute(delete_all)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
-#clear_order_data()
+# clear_order_data()
 
 
 ###############################################################################
 
 def create_customer_table():
-    connect_database.execute('''
+    try:
+        connect_database.execute('''
                   CREATE TABLE IF NOT EXISTS CUSTOMER (
                  id INTEGER NOT NULL
         PRIMARY KEY AUTOINCREMENT,
                name TEXT,
               email TEXT)
       ''')
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 create_customer_table()
 
 
 def add_customer_data():
-    sql = 'INSERT INTO CUSTOMER( name, email) values(?,?)'
-    customer_table = [('John Doe', 'jdoe@email.com'),
-                      ('Johnny Doe', 'jhdoe@email.com'),
-                      ('Jane Doe', 'jedoe@email.com'),
-                      ('Janey Do', 'jydoe@email.com'),
-                      ('Joey Doe', 'jodoe@email.com'),
-                      ('Katsu Dog', 'kdog@email.com'),
-                      ('M Niece', 'mniece@email.com'),
-                      ('A Child', 'achild@email.com'),
-                      ('Mochi Dog', 'mdog@email.com')
-                      ]
-    connect_database.executemany(sql, customer_table)
+    try:
+        sql = 'INSERT INTO CUSTOMER( name, email) values(?,?)'
+        customer_table = [('John Doe', 'jdoe@email.com'),
+                          ('Johnny Doe', 'jhdoe@email.com'),
+                          ('Jane Doe', 'jedoe@email.com'),
+                          ('Janey Do', 'jydoe@email.com'),
+                          ('Joey Doe', 'jodoe@email.com'),
+                          ('Katsu Dog', 'kdog@email.com'),
+                          ('M Niece', 'mniece@email.com'),
+                          ('A Child', 'achild@email.com'),
+                          ('Mochi Dog', 'mdog@email.com')
+                          ]
+        connect_database.executemany(sql, customer_table)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 # add_customer_data()
 
 
 def add_or_update_customer_data():
-    sql_update = "INSERT OR REPLACE INTO CUSTOMER (name, email) VALUES ('John Doe', 'jdoe@email.com') "
-
-    connect_database.execute(sql_update)
+    try:
+        sql_update = "INSERT OR REPLACE INTO CUSTOMER (name, email) VALUES ('John Doe', 'jdoe@email.com')"
+        connect_database.execute(sql_update)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 add_or_update_customer_data()
@@ -110,9 +132,12 @@ add_or_update_customer_data()
 
 # deletes any row with name and email = remove duplicate entries/customer data
 def update_table_rows():
-    delete_statement = 'DELETE FROM CUSTOMER WHERE rowid > (SELECT MIN(rowid) FROM CUSTOMER c2 WHERE CUSTOMER.name = ' \
-                       'c2.name AND CUSTOMER.email = c2.email); '
-    connect_database.execute(delete_statement)
+    try:
+        delete_statement = 'DELETE FROM CUSTOMER WHERE rowid > (SELECT MIN(rowid) FROM CUSTOMER c2 WHERE CUSTOMER.name = ' \
+                           'c2.name AND CUSTOMER.email = c2.email); '
+        connect_database.execute(delete_statement)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 update_table_rows()
@@ -121,10 +146,13 @@ update_table_rows()
 # print neatly  https://stackoverflow.com/questions/305378/list-of-tables-db-schema-dump-etc-using-the-python-sqlite3
 # -api
 def customer_data():
-    select_all_table = "SELECT * FROM CUSTOMER"
-    cursor = connect_database.execute(select_all_table)
-    results = cursor.fetchall()
-    print(results)
+    try:
+        select_all_table = "SELECT * FROM CUSTOMER"
+        cursor = connect_database.execute(select_all_table)
+        results = cursor.fetchall()
+        print(results)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 print('customer database:')
@@ -132,7 +160,8 @@ customer_data()
 
 
 def create_order_table():
-    connect_database.execute('''   
+    try:
+        connect_database.execute('''   
                       CREATE TABLE IF NOT EXISTS ORDERS (
                      id INTEGER NOT NULL
             PRIMARY KEY AUTOINCREMENT,
@@ -142,43 +171,54 @@ def create_order_table():
                  product TEXT
                 )
           ''')
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 create_order_table()
 
 
 def add_column_order():
-    connect_database.execute("ALTER TABLE ORDERS ADD product TEXT")
+    try:
+        connect_database.execute("ALTER TABLE ORDERS ADD product TEXT")
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
-#add_column_order()
+# add_column_order()
 
 
 # use this to update OR add new customer specific ones can add later with UI
 def add_order_data():
-    sql = 'INSERT INTO ORDERS( status, email, notes, product) values(?,?,?,?)'
-    updated_order_table = [('en-route', 'jdoe@email.com', 'cc', 'earrings'),
-                           ('pending', 'jhdoe@email.com', 'cc', 'ring'),
-                           ('at hub', 'jdoe@email.com', 'wire', 'necklace'),
-                           ('pending', 'jdoe@email.com', 'cc', 'bracelet'),
-                           ('delayed', 'jdoe@email.com', 'cc', 'ring'),
-                           ('delivered', 'kdog@email.com', 'cc', 'brooch'),
-                           ('delivered', 'mniece@email.com', 'cc', 'necklace'),
-                           ('delivered', 'achild@email.com', 'cc', 'ring'),
-                           ('delivered', 'mdog@email.com', 'cc', 'ring')
-                           ]
+    try:
+        sql = 'INSERT INTO ORDERS( status, email, notes, product) values(?,?,?,?)'
+        updated_order_table = [('en-route', 'jdoe@email.com', 'cc', 'earrings'),
+                               ('pending', 'jhdoe@email.com', 'cc', 'ring'),
+                               ('at hub', 'jdoe@email.com', 'wire', 'necklace'),
+                               ('pending', 'jdoe@email.com', 'cc', 'bracelet'),
+                               ('delayed', 'jdoe@email.com', 'cc', 'ring'),
+                               ('delivered', 'kdog@email.com', 'cc', 'brooch'),
+                               ('delivered', 'mniece@email.com', 'cc', 'necklace'),
+                               ('delivered', 'achild@email.com', 'cc', 'ring'),
+                               ('delivered', 'mdog@email.com', 'cc', 'ring')
+                               ]
 
-    connect_database.executemany(sql, updated_order_table)
+        connect_database.executemany(sql, updated_order_table)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
-add_order_data()
+# add_order_data()
 
 
 def order_data():
-    select_all_table = "SELECT * FROM ORDERS"
-    cursor = connect_database.execute(select_all_table)
-    results = cursor.fetchall()
-    print(results)
+    try:
+        select_all_table = "SELECT * FROM ORDERS"
+        cursor = connect_database.execute(select_all_table)
+        results = cursor.fetchall()
+        print(results)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 print('orders database:')
@@ -189,9 +229,12 @@ order_data()
 
 
 def update_table_rows_order():
-    delete_statement = 'DELETE FROM ORDERS WHERE rowid > (SELECT MIN(rowid) FROM ORDERS o2 WHERE ORDERS.email = ' \
-                       'o2.email AND ORDERS.id = o2.id); '
-    connect_database.execute(delete_statement)
+    try:
+        delete_statement = 'DELETE FROM ORDERS WHERE rowid > (SELECT MIN(rowid) FROM ORDERS o2 WHERE ORDERS.email = ' \
+                           'o2.email AND ORDERS.id = o2.id); '
+        connect_database.execute(delete_statement)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 update_table_rows_order()
@@ -199,31 +242,38 @@ update_table_rows_order()
 
 # change line if need to update/insert
 def add_or_update_order_data():
-    sql_update = "INSERT OR REPLACE INTO ORDERS (status, email, notes) VALUES ('at hub', 'jfoo@email.com', 'cc') "
+    try:
+        sql_update = "INSERT OR REPLACE INTO ORDERS (status, email, notes) VALUES ('at hub', 'jfoo@email.com', 'cc') "
 
-    connect_database.execute(sql_update)
+        connect_database.execute(sql_update)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 add_or_update_order_data()
 
 
 def delete_extra_entries():
-    swl = "DELETE FROM ORDERS WHERE email LIKE 'jfoo@email.com'"
-    connect_database.execute(swl)
+    try:
+        swl = "DELETE FROM ORDERS WHERE email LIKE 'jfoo@email.com'"
+        connect_database.execute(swl)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
 
 
 delete_extra_entries()
+
+# db commit
 connect_database.commit()
 
 #####################################################################################
 #####################################################################################
 
 
-
 # Set file names for train and test data data import from CSV
 test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
 
-#kaggle dataset customer complaints
+# kaggle dataset customer complaints
 csv_train_file = os.path.join(test_data_dir, 'complaints_processed.csv')
 
 # created pseudo customer emails (the most common emails)
@@ -232,12 +282,10 @@ csv_test_file = os.path.join(test_data_dir, 'emails from Seattle Jewelry Company
 # cleaned data for naiive bayes and doc2vec analysis
 csv_tmp_file = os.path.join(test_data_dir, 'data_part_.csv')
 
-
 csv_test_result = os.path.join(test_data_dir, 'SJCompany.csv')
 
-#saved model (saves 15 minutes of training time)
+# saved model (saves 15 minutes of training time)
 pickle_save = os.path.join(test_data_dir, 'eric_model.pkl')
-
 
 # issue with values
 # https://www.youtube.com/watch?v=OS2m0f2gVJ0
@@ -246,7 +294,7 @@ missing_narrative = ['N/a', "Nan", "NaN", np.nan, "na", "Na", None]
 # needed to ignore first column (importing duplicate first col)
 # https://www.statology.org/pandas-read-csv-ignore-first-column/
 
-#read csv in chunks and put into a clean csv file for analysis
+# read csv in chunks and put into a clean csv file for analysis
 df_iterator = pd.read_csv(
     csv_train_file,
     chunksize=10000)
@@ -267,33 +315,32 @@ for i, df_chunk in enumerate(df_iterator):
 # dataframe df initialized
 df = pd.read_csv(csv_tmp_file)
 
-#expand column widths
+# expand column widths
 pd.set_option('display.max_colwidth', None)
-
 
 print(df)
 
-#show value counts
+# show value counts
 print(df['product'].value_counts())
 
-#remove null values
+# remove null values
 print(df.isnull().sum())
 print(df.isnull().any())
 
 # display NaN values and product number
 nan_values = df[df['narrative'].isna()]
 
-#show nan values
+# show nan values
 print(nan_values)
 
 # drop wasn't working, needed to add parameter
 # https://stackoverflow.com/questions/49712002/pandas-dropna-function-not-working
 df.dropna(inplace=True)
 
-#print out dataframe value counts making sure nan values were dropped
+# print out dataframe value counts making sure nan values were dropped
 df['product'].value_counts().plot(kind='bar')
 
-#bar plot labels and label orientation fixed (visual #1)
+# bar plot labels and label orientation fixed (visual #1)
 plt.bar(x='product', height=3.0, width=3.0)
 plt.xticks(rotation=10)
 plt.title('Email Description Counts')
@@ -302,7 +349,7 @@ plt.show()
 # initialized dataframe complaints_dataframe for analysis by ML algorithms
 complaints_dataframe = df[['product', 'narrative']]
 
-#search for these terms and will use these for prediction and analysis later
+# search for these terms and will use these for prediction and analysis later
 search_terms = {'credit_reporting': 0, 'debt_collection': 1, 'mortgages_and_loans': 2, 'credit_card': 3,
                 'retail_banking': 4
                 }
@@ -321,6 +368,19 @@ stop_words = stopwords.words("english")
 
 # load pickle model (saved model)
 model = pickle.load(open(pickle_save, 'rb'))
+
+
+def emails_out_to_customers():
+    with open(csv_test_file, 'rt') as f:
+        reader = csv.reader(f, delimiter=',')
+        for row in reader:
+            if email_input in row:
+                print(
+                    "##################################################################################################")
+                print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
+                print("\nrows of data for given email:", row)
+                # if email not in file-prompt customer to respond with email used to place order
+
 
 # tokenizer - removes words less than 2 and ignores Xx
 def tokenizer(text):
@@ -346,7 +406,7 @@ x_sm, y_sm = SMOTE().fit_resample(x_for, df['product'][:10000])
 # initialize x and y train and test
 X_train, X_test, y_train, y_test = train_test_split(x_sm, y_sm, test_size=0.3, random_state=0)
 
-#checking shapes of each and theyre irregular- need SMOTE to fix
+# checking shapes of each and theyre irregular- need SMOTE to fix
 # issue with fit here
 # https://www.geeksforgeeks.org/ml-handling-imbalanced-data-with-smote-and-near-miss-algorithm-in-python/
 # followed SMOTE guide because i ran into an error with size of data differences.
@@ -356,22 +416,22 @@ print('this is xtest', X_test.shape)
 print('this is y_train', y_train.shape)
 print('this is y_test', y_test.shape)
 
-
 # send data through multinomial naiive bayes algorithm
 mnb = MultinomialNB()
 
-#fit data to naiive bayes
+# fit data to naiive bayes
 mnb.fit(X_train, y_train)
 
-#predict outcomes
+# predict outcomes
 X_test_predict = mnb.predict(X_test)
 X_pred = mnb.predict(x_for)
 
-#check classification
+# check classification
 print(classification_report(y_test, X_test_predict))
 
-#check accuracy
+# check accuracy
 print('MNB accuracy score: ', mnb.score(X_train, y_train))
+
 
 ###############################################################################
 # read in text for doc2vec
@@ -386,10 +446,11 @@ def read_corpus(file, tokens_only=False):
                 # For training data, add tags
                 yield gensim.models.doc2vec.TaggedDocument(tokens, [i])
 
-#train with kaggle dataset
+
+# train with kaggle dataset
 train_corpus = list(read_corpus(csv_tmp_file))
 
-#test with seattle jewelry company customer emails
+# test with seattle jewelry company customer emails
 test_corpus = list(read_corpus(csv_test_file))
 
 # Train corpus print
@@ -435,8 +496,8 @@ dc = DecisionTreeClassifier()
 dc1 = dc.fit(X_train, y_train)
 y_predict = dc.predict(X_test)
 
-#check accuracy of decision tree
-print("Accuracy check:", metrics.accuracy_score(y_test, y_predict))
+# check accuracy of decision tree
+print("Decision Tree Classifier Accuracy check:", metrics.accuracy_score(y_test, y_predict))
 
 # added tree plot and confusion matrix for display
 dc2 = tree.DecisionTreeClassifier(random_state=0)
@@ -446,7 +507,7 @@ tree.plot_tree(dcs2, fontsize=2)
 dcs = SVC(random_state=0)
 dcs.fit(X_train, y_train)
 SVC(random_state=0)
-#3rd visual aide confusion matrix display
+# 3rd visual aide confusion matrix display
 ConfusionMatrixDisplay.from_estimator(dcs, X_test, y_test)
 plt.show()
 
@@ -489,29 +550,26 @@ print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
-#check to see if model agrees
+# check to see if model agrees
 print('Document ({}): «{}»\n'.format(doc_id, ' '.join(train_corpus[doc_id].words)))
 print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
 # check here for product. If new product is launching and customer has bought in past. Send email
-def customer_product_check():
-
-
-
-
-
+# https://ppc-automation.medium.com/python-send-email-without-smtp-server-754f4782b7f6
+# def customer_product_check():
 
 
 ###############################################################################
 ############################# GUI #############################################
 ###############################################################################
-print("###############################################################################")
+print(
+    "########################################################################################################################")
 
 if __name__ == '__main__':
     print("Computer Science Capstone C964 | Nicole Mau | nmau@wgu.edu | "
-          "001336361 | eric_bot | email response in corporations")
+          "001336361 | eric_bot | email_response_in_corporations bot")
 
     # loop until user is satisfied
     isExit = True
@@ -545,9 +603,11 @@ if __name__ == '__main__':
             email_input = input(" ")
             c2 = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input,))
             result = c2.fetchall()
+            print("##################################################################################################")
             print("Customer information for email address:", result)
             cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input,))
             results = cursor.fetchall()
+            print("##################################################################################################")
             print("Order information for selected email:", results)
 
             # https://stackoverflow.com/questions/17308872/check-whether-string-is-in-csv
@@ -556,6 +616,8 @@ if __name__ == '__main__':
                 reader = csv.reader(f, delimiter=',')
                 for row in reader:
                     if email_input in row:
+                        print(
+                            "##################################################################################################")
                         print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
                         print("\nrows of data for given email:", row)
                         # if email not in file-prompt customer to respond with email used to place order
