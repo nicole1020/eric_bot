@@ -10,7 +10,7 @@ from googleapiclient.discovery import build
 test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
 SECRET_FILE = os.path.join(test_data_dir, "client_secret.json")
 
-# ran into error with oauth login - using token file to avoid separate login
+# ran into error with oauth login - using token file to avoid separate login (this is for local server)
 enable_login = os.path.join(test_data_dir, 'token.json')
 
 

@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 from nltk import word_tokenize, SnowballStemmer
 from nltk.corpus import stopwords
 from sklearn.naive_bayes import MultinomialNB
-import sqlite3 as sl
+import sqlite3 as sql
 from sklearn.metrics import classification_report
 import collections
 import random
@@ -31,20 +31,19 @@ import tkinter.ttk as ttk
 
 from email_helper import send_message
 
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-
+logging.getLogger('googleapicliet.discovery_cache').setLevel(logging.ERROR)
 # I want a version of this email every x amount of time. Will use this function timer
 # https://realpython.com/python-timer/
 # if customer placed order recently (similar items)
 # if customer has not placed order recently
 # if customers have sent similar emails - send escalation email or notice out.
 print('this email here:')
-send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com", "test", "this is a tesst", user_id='me')
+send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com", "hello from eric capstone", "test message 1", user_id='me')
 
 # create sqllite sql database for future sensitive customer data live/practical application would have a separate
 # server for customer data
-
-connect_database = sl.connect('my_test_customers.db')
+# db corrupted somehow -renamed and recreated db file-
+connect_database = sql.connect('my_test_db.db')
 
 
 ###############################################################################
@@ -84,12 +83,11 @@ def clear_order_data():
 
 def create_customer_table():
     try:
-        connect_database.execute('''
-                  CREATE TABLE IF NOT EXISTS CUSTOMER (
-                 id INTEGER NOT NULL
-        PRIMARY KEY AUTOINCREMENT,
+        connect_database.execute(''' 
+        CREATE TABLE IF NOT EXISTS customer ( 
+        id INTEGER  PRIMARY KEY AUTOINCREMENT,
                name TEXT,
-              email TEXT)
+              email TEXT )
       ''')
     except ValueError as e:
         print('An error occurred: %s' % e)
@@ -100,7 +98,7 @@ create_customer_table()
 
 def add_customer_data():
     try:
-        sql = 'INSERT INTO CUSTOMER( name, email) values(?,?)'
+        sql = 'INSERT INTO customer(name, email) values(?,?)'
         customer_table = [('John Doe', 'jdoe@email.com'),
                           ('Johnny Doe', 'jhdoe@email.com'),
                           ('Jane Doe', 'jedoe@email.com'),
@@ -121,33 +119,33 @@ def add_customer_data():
 
 def add_or_update_customer_data():
     try:
-        sql_update = "INSERT OR REPLACE INTO CUSTOMER (name, email) VALUES ('John Doe', 'jdoe@email.com')"
+        sql_update = "INSERT OR REPLACE INTO customer (name, email) VALUES ('John Doe', 'jdoe@email.com')"
         connect_database.execute(sql_update)
     except ValueError as e:
         print('An error occurred: %s' % e)
 
 
-add_or_update_customer_data()
+# add_or_update_customer_data()
 
 
 # deletes any row with name and email = remove duplicate entries/customer data
 def update_table_rows():
     try:
-        delete_statement = 'DELETE FROM CUSTOMER WHERE rowid > (SELECT MIN(rowid) FROM CUSTOMER c2 WHERE CUSTOMER.name = ' \
-                           'c2.name AND CUSTOMER.email = c2.email); '
+        delete_statement = 'DELETE FROM customer WHERE rowid > (SELECT MIN(rowid) FROM customer c2 WHERE customer.name = ' \
+                           'c2.name AND customer.email = c2.email); '
         connect_database.execute(delete_statement)
     except ValueError as e:
         print('An error occurred: %s' % e)
 
 
-update_table_rows()
+# update_table_rows()
 
 
 # print neatly  https://stackoverflow.com/questions/305378/list-of-tables-db-schema-dump-etc-using-the-python-sqlite3
 # -api
 def customer_data():
     try:
-        select_all_table = "SELECT * FROM CUSTOMER"
+        select_all_table = "SELECT * FROM customer"
         cursor = connect_database.execute(select_all_table)
         results = cursor.fetchall()
         print(results)
@@ -162,7 +160,7 @@ customer_data()
 def create_order_table():
     try:
         connect_database.execute('''   
-                      CREATE TABLE IF NOT EXISTS ORDERS (
+                      CREATE TABLE IF NOT EXISTS orders (
                      id INTEGER NOT NULL
             PRIMARY KEY AUTOINCREMENT,
                     status TEXT,
@@ -180,7 +178,7 @@ create_order_table()
 
 def add_column_order():
     try:
-        connect_database.execute("ALTER TABLE ORDERS ADD product TEXT")
+        connect_database.execute("ALTER TABLE orders ADD product TEXT")
     except ValueError as e:
         print('An error occurred: %s' % e)
 
@@ -191,7 +189,7 @@ def add_column_order():
 # use this to update OR add new customer specific ones can add later with UI
 def add_order_data():
     try:
-        sql = 'INSERT INTO ORDERS( status, email, notes, product) values(?,?,?,?)'
+        sql = 'INSERT INTO orders( status, email, notes, product) values(?,?,?,?)'
         updated_order_table = [('en-route', 'jdoe@email.com', 'cc', 'earrings'),
                                ('pending', 'jhdoe@email.com', 'cc', 'ring'),
                                ('at hub', 'jdoe@email.com', 'wire', 'necklace'),
@@ -213,7 +211,7 @@ def add_order_data():
 
 def order_data():
     try:
-        select_all_table = "SELECT * FROM ORDERS"
+        select_all_table = "SELECT * FROM orders"
         cursor = connect_database.execute(select_all_table)
         results = cursor.fetchall()
         print(results)
@@ -230,38 +228,38 @@ order_data()
 
 def update_table_rows_order():
     try:
-        delete_statement = 'DELETE FROM ORDERS WHERE rowid > (SELECT MIN(rowid) FROM ORDERS o2 WHERE ORDERS.email = ' \
-                           'o2.email AND ORDERS.id = o2.id); '
+        delete_statement = 'DELETE FROM orders WHERE rowid > (SELECT MIN(rowid) FROM orders o2 WHERE orders.email = ' \
+                           'o2.email AND orders.id = o2.id); '
         connect_database.execute(delete_statement)
     except ValueError as e:
         print('An error occurred: %s' % e)
 
 
-update_table_rows_order()
+# update_table_rows_order()
 
 
 # change line if need to update/insert
 def add_or_update_order_data():
     try:
-        sql_update = "INSERT OR REPLACE INTO ORDERS (status, email, notes) VALUES ('at hub', 'jfoo@email.com', 'cc') "
+        sql_update = "INSERT OR REPLACE INTO orders (status, email, notes) VALUES ('at hub', 'jfoo@email.com', 'cc') "
 
         connect_database.execute(sql_update)
     except ValueError as e:
         print('An error occurred: %s' % e)
 
 
-add_or_update_order_data()
+# add_or_update_order_data()
 
 
 def delete_extra_entries():
     try:
-        swl = "DELETE FROM ORDERS WHERE email LIKE 'jfoo@email.com'"
+        swl = "DELETE FROM orders WHERE email LIKE 'jfoo@email.com'"
         connect_database.execute(swl)
     except ValueError as e:
         print('An error occurred: %s' % e)
 
 
-delete_extra_entries()
+# delete_extra_entries()
 
 # db commit
 connect_database.commit()
