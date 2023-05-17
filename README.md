@@ -4,8 +4,9 @@ A work in progress- estimated completion date June 1, 2023
 
 Windows 10 PyCharm Community Edition 2022.2.3 
 
-Python 3.10 
+Python 3.10.10 
 
+crontab 1.0.1
 
 Genism 4.3.1
 
