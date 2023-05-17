@@ -6,6 +6,7 @@ from datetime import timedelta
 
 import sklearn
 import smart_open
+import vectorize as vectorize
 from imblearn.over_sampling import SMOTE
 from sklearn import metrics, tree
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -37,8 +38,11 @@ logging.getLogger('googleapicliet.discovery_cache').setLevel(logging.ERROR)
 # if customer placed order recently (similar items)
 # if customer has not placed order recently
 # if customers have sent similar emails - send escalation email or notice out.
+
+
 print('this email here:')
-send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com", "hello from eric capstone", "test message 1", user_id='me')
+send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com", "hello from eric capstone", "test message 1",
+             user_id='me')
 
 # create sqllite sql database for future sensitive customer data live/practical application would have a separate
 # server for customer data
@@ -157,6 +161,9 @@ print('customer database:')
 customer_data()
 
 
+###############################################################################
+# order table initialized
+###############################################################################
 def create_order_table():
     try:
         connect_database.execute('''   
@@ -175,6 +182,8 @@ def create_order_table():
 
 create_order_table()
 
+
+# added column to table order
 
 def add_column_order():
     try:
@@ -208,7 +217,7 @@ def add_order_data():
 
 # add_order_data()
 
-
+# printing all orders
 def order_data():
     try:
         select_all_table = "SELECT * FROM orders"
@@ -225,7 +234,7 @@ order_data()
 
 # https://www.krazyprogrammer.com/2020/12/how-to-search-data-from-sqlite-in.html
 
-
+# remove duplicate entries
 def update_table_rows_order():
     try:
         delete_statement = 'DELETE FROM orders WHERE rowid > (SELECT MIN(rowid) FROM orders o2 WHERE orders.email = ' \
@@ -250,7 +259,7 @@ def add_or_update_order_data():
 
 # add_or_update_order_data()
 
-
+# remove duplicate orders
 def delete_extra_entries():
     try:
         swl = "DELETE FROM orders WHERE email LIKE 'jfoo@email.com'"
@@ -265,6 +274,7 @@ def delete_extra_entries():
 connect_database.commit()
 
 #####################################################################################
+# machine learning model
 #####################################################################################
 
 
@@ -280,8 +290,11 @@ csv_test_file = os.path.join(test_data_dir, 'emails from Seattle Jewelry Company
 # cleaned data for naiive bayes and doc2vec analysis
 csv_tmp_file = os.path.join(test_data_dir, 'data_part_.csv')
 
+# test emails i created that represent the majority of incoming customer communications
 csv_test_result = os.path.join(test_data_dir, 'SJCompany.csv')
 
+# test emails i created that represent the majority of outgoing customer communications
+csv_response = os.path.join(test_data_dir, 'SJCCompanyOutgoingEmails.csv')
 # saved model (saves 15 minutes of training time)
 pickle_save = os.path.join(test_data_dir, 'eric_model.pkl')
 
@@ -335,6 +348,9 @@ print(nan_values)
 # https://stackoverflow.com/questions/49712002/pandas-dropna-function-not-working
 df.dropna(inplace=True)
 
+
+
+            # if email not in file-prompt customer to respond with email used to place order
 # print out dataframe value counts making sure nan values were dropped
 df['product'].value_counts().plot(kind='bar')
 
@@ -393,13 +409,13 @@ def tokenizer(text):
 vectorize = TfidfVectorizer(analyzer=tokenizer)
 
 # sets narrative to tfidf vectorizer
-x_for = vectorize.fit_transform(df['narrative'][:10000].values.astype('U'))
+x_for = vectorize.fit_transform(df['narrative'][:1000].values.astype('U'))
 
 # expand column size
 pd.set_option('display.max_colwidth', None)
 
 # use SMOTE for irregularly shaped data types
-x_sm, y_sm = SMOTE().fit_resample(x_for, df['product'][:10000])
+x_sm, y_sm = SMOTE().fit_resample(x_for, df['product'][:1000])
 
 # initialize x and y train and test
 X_train, X_test, y_train, y_test = train_test_split(x_sm, y_sm, test_size=0.3, random_state=0)
@@ -429,6 +445,23 @@ print(classification_report(y_test, X_test_predict))
 
 # check accuracy
 print('MNB accuracy score: ', mnb.score(X_train, y_train))
+
+
+# test
+
+with open(csv_test_file, 'rt') as f:
+    reader = csv.reader(f, delimiter=',')
+    for row in reader:
+        if 'jhdoe@email.com' in row:
+            data_frame = ['jhdoe@email.com']
+
+            vector = vectorize.fit_transform(row)
+            category_value = mnb.predict(vector)
+            print("this is category value:", category_value)
+            print(
+                "##################################################################################################")
+            print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
+            print("\nrows of data for given email:", row)
 
 
 ###############################################################################
@@ -577,8 +610,9 @@ if __name__ == '__main__':
         print("2. Get a Specific Order Status with ID")
         print("3. Get all Customer Data")
         print("4. Get Specific Customer/order Information by email")
-        print("5. Exit the Program")
-        option = input("Chose an option (1,2,3,4, or 5): ")
+        print("5. Add New Customer")
+        print("6. Exit the Program")
+        option = input("Chose an option (1,2,3,4,5 or 6): ")
         # print all order data
         if option == "1":
             order_data()
@@ -613,7 +647,10 @@ if __name__ == '__main__':
             with open(csv_test_file, 'rt') as f:
                 reader = csv.reader(f, delimiter=',')
                 for row in reader:
-                    if email_input in row:
+                    if 'jhdoe@email.com' in row:
+                        vector = vectorize.fit_transform(row)
+                        category_value = mnb.predict(vector)
+                        print("this is category value:", category_value)
                         print(
                             "##################################################################################################")
                         print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
@@ -621,6 +658,15 @@ if __name__ == '__main__':
                         # if email not in file-prompt customer to respond with email used to place order
         # option to exit
         elif option == '5':
+            print("Please enter customer name")
+            name_input = input("")
+            print("Please enter customer email")
+            email_input = input(" ")
+
+            c3 = connect_database.execute("INSERT INTO customer (name, email) values (?,?)", (name_input, email_input))
+            result = c3.fetchall()
+            print("New Customer Added to database:", result)
+        elif option == '6':
             isExit = False
         else:
             print("Invalid option, please try again!")
