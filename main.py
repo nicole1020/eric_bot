@@ -1,6 +1,7 @@
 """Computer Science Capstone C964 | Nicole Mau | nmau@wgu.edu | 001336361 | eric_bot | email response in corporations"""
 import csv
 import logging
+import mmap
 import pickle
 from datetime import timedelta
 
@@ -449,19 +450,22 @@ print('MNB accuracy score: ', mnb.score(X_train, y_train))
 
 # test
 
-with open(csv_test_file, 'rt') as f:
-    reader = csv.reader(f, delimiter=',')
-    for row in reader:
-        if 'jhdoe@email.com' in row:
-            data_frame = ['jhdoe@email.com']
+with open(csv_test_file) as f:
+   # reader = csv.reader(f, delimiter=',')
+    #for row in reader:
+    st = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+    if st.find(b'jhdoe@email.com') != -1:
+        data_frame = ['jhdoe@email.com']
+        vector = vectorize.fit_transform(data_frame)
+        update = vector.toarray()
+        this = pd.DataFrame(update, columns=y_test)
+        category = mnb.predict(this)
 
-            vector = vectorize.fit_transform(row)
-            category_value = mnb.predict(vector)
-            print("this is category value:", category_value)
-            print(
-                "##################################################################################################")
-            print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
-            print("\nrows of data for given email:", row)
+        print("this is category value:", category)
+        print(
+            "##################################################################################################")
+        print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
+       # print("\nrows of data for given email:", row)
 
 
 ###############################################################################
