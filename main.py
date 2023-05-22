@@ -364,16 +364,15 @@ plt.title('Email Description Counts')
 complaints_dataframe = df[['product', 'narrative']]
 
 # search for these terms and will use these for prediction and analysis later
-#search_terms = {'credit_reporting': 0, 'debt_collection': 1, 'mortgages_and_loans': 2, 'credit_card': 3,
- #               'retail_banking': 4
-  #              }
+search_terms = {'credit_reporting': 0, 'debt_collection': 1, 'mortgages_and_loans': 2, 'credit_card': 3,
+                'retail_banking': 4
+                }
 
 # show value counts by product
 print(complaints_dataframe['product'].value_counts())
 
 # map search terms to products
-#complaints_dataframe['search_terms'] = complaints_dataframe['product'].map(search_terms)
-
+complaints_dataframe['search_terms'] = complaints_dataframe['product'].map(search_terms)
 
 # stemmer
 stemmer = SnowballStemmer(language='english')
@@ -498,11 +497,11 @@ print(f"Word 'jewelry' appeared {model.wv.get_vecattr('jewelry', 'count')} times
 ###############################################################################
 # check trained model for terms as vectors
 
-#list_of_terms = ['jewelry', 'pearls', 'necklace', 'earrings', 'gemstone']
+# list_of_terms = ['jewelry', 'pearls', 'necklace', 'earrings', 'gemstone']
 # introductory- will expand terms in real life data with 'order status', 'exchange', 'return', 'refund'
-#vector = model.infer_vector(list_of_terms)
-#print(list_of_terms)
-#print(vector)
+# vector = model.infer_vector(list_of_terms)
+# print(list_of_terms)
+# print(vector)
 
 # pickle save model
 # pickle.dump(model, open(pickle_save, 'wb'))
@@ -604,6 +603,15 @@ def find_index(input):
             index += 1
 
 
+enc = OneHotEncoder(handle_unknown='ignore')
+# creating instance of one-hot-encoder
+
+# passing bridge-types-cat column (label encoded values of bridge_types)
+enc_df = pd.DataFrame(enc.fit_transform(complaints_dataframe[['search_terms']]).toarray())
+# merge with main df bridge_df on key values
+complaints_dataframe = complaints_dataframe.join(enc_df)
+
+
 def check_for_email(email_input):
     with open(csv_test_file, 'r+') as af:
 
@@ -614,16 +622,16 @@ def check_for_email(email_input):
                 print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
                 print("\nrows of data for given email:", row)
 
-                #newshape = category.reshape(1, -1)
+                # newshape = category.reshape(1, -1)
                 # merge with main df bridge_df on key values
-                df_email_input = [row]
+                df_email_input = [row[:]]
                 # category = mnb.predict(np.array([email_input]).reshape(-1, 1))
                 # print(category)
                 predict_vector = vectorize.fit_transform(df_email_input)
-                enc = OneHotEncoder(handle_unknown='ignore')
-                category = pd.DataFrame(enc.fit_transform(predict_vector))
-                # cd_update = np.array(category).reshape(1, -1)
-                predict_this = mnb.predict(np.array(category))
+                p_to_array = predict_vector.toarray()
+                category = pd.DataFrame(enc.fit_transform(p_to_array))
+                cd_update = category.to_xarray()
+                predict_this = mnb.predict(cd_update.todense())
                 print(predict_this)
                 # if email not in file-prompt +?ustomer to respond with email used to place order
 
