@@ -11,6 +11,7 @@ import vectorize as vectorize
 from imblearn.over_sampling import SMOTE
 from sklearn import metrics, tree
 from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
@@ -349,31 +350,30 @@ print(nan_values)
 # https://stackoverflow.com/questions/49712002/pandas-dropna-function-not-working
 df.dropna(inplace=True)
 
-
-
-            # if email not in file-prompt customer to respond with email used to place order
+# if email not in file-prompt customer to respond with email used to place order
 # print out dataframe value counts making sure nan values were dropped
 df['product'].value_counts().plot(kind='bar')
 
 # bar plot labels and label orientation fixed (visual #1)
-plt.bar(x='product', height=3.0, width=3.0)
+# plt.bar(x='product', height=3.0, width=3.0)
 plt.xticks(rotation=10)
 plt.title('Email Description Counts')
-plt.show()
+# plt.show()
 
 # initialized dataframe complaints_dataframe for analysis by ML algorithms
 complaints_dataframe = df[['product', 'narrative']]
 
 # search for these terms and will use these for prediction and analysis later
-search_terms = {'credit_reporting': 0, 'debt_collection': 1, 'mortgages_and_loans': 2, 'credit_card': 3,
-                'retail_banking': 4
-                }
+#search_terms = {'credit_reporting': 0, 'debt_collection': 1, 'mortgages_and_loans': 2, 'credit_card': 3,
+ #               'retail_banking': 4
+  #              }
 
 # show value counts by product
 print(complaints_dataframe['product'].value_counts())
 
 # map search terms to products
-complaints_dataframe['search_terms'] = complaints_dataframe['product'].map(search_terms)
+#complaints_dataframe['search_terms'] = complaints_dataframe['product'].map(search_terms)
+
 
 # stemmer
 stemmer = SnowballStemmer(language='english')
@@ -411,7 +411,8 @@ vectorize = TfidfVectorizer(analyzer=tokenizer)
 
 # sets narrative to tfidf vectorizer
 x_for = vectorize.fit_transform(df['narrative'][:1000].values.astype('U'))
-
+print(complaints_dataframe.head(10))
+print(complaints_dataframe.info(verbose=True))
 # expand column size
 pd.set_option('display.max_colwidth', None)
 
@@ -442,30 +443,10 @@ X_test_predict = mnb.predict(X_test)
 X_pred = mnb.predict(x_for)
 
 # check classification
-print(classification_report(y_test, X_test_predict))
+# print(classification_report(y_test, X_test_predict))
 
 # check accuracy
 print('MNB accuracy score: ', mnb.score(X_train, y_train))
-
-
-# test
-
-with open(csv_test_file) as f:
-   # reader = csv.reader(f, delimiter=',')
-    #for row in reader:
-    st = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
-    if st.find(b'jhdoe@email.com') != -1:
-        data_frame = ['jhdoe@email.com']
-        vector = vectorize.fit_transform(data_frame)
-        update = vector.toarray()
-        this = pd.DataFrame(update, columns=y_test)
-        category = mnb.predict(this)
-
-        print("this is category value:", category)
-        print(
-            "##################################################################################################")
-        print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
-       # print("\nrows of data for given email:", row)
 
 
 ###############################################################################
@@ -517,34 +498,34 @@ print(f"Word 'jewelry' appeared {model.wv.get_vecattr('jewelry', 'count')} times
 ###############################################################################
 # check trained model for terms as vectors
 
-list_of_terms = ['jewelry', 'pearls', 'necklace', 'earrings', 'gemstone']
+#list_of_terms = ['jewelry', 'pearls', 'necklace', 'earrings', 'gemstone']
 # introductory- will expand terms in real life data with 'order status', 'exchange', 'return', 'refund'
-vector = model.infer_vector(list_of_terms)
-print(list_of_terms)
-print(vector)
+#vector = model.infer_vector(list_of_terms)
+#print(list_of_terms)
+#print(vector)
 
 # pickle save model
 # pickle.dump(model, open(pickle_save, 'wb'))
 
 # 2nd visual aide, Decision tree classifier
-dc = DecisionTreeClassifier()
-dc1 = dc.fit(X_train, y_train)
-y_predict = dc.predict(X_test)
+# dc = DecisionTreeClassifier()
+# dc1 = dc.fit(X_train, y_train)
+# y_predict = dc.predict(X_test)
 
 # check accuracy of decision tree
-print("Decision Tree Classifier Accuracy check:", metrics.accuracy_score(y_test, y_predict))
+# print("Decision Tree Classifier Accuracy check:", metrics.accuracy_score(y_test, y_predict))
 
 # added tree plot and confusion matrix for display
-dc2 = tree.DecisionTreeClassifier(random_state=0)
-dcs2 = dc2.fit(X_train, y_train)
-tree.plot_tree(dcs2, fontsize=2)
+# dc2 = tree.DecisionTreeClassifier(random_state=0)
+# dcs2 = dc2.fit(X_train, y_train)
+# tree.plot_tree(dcs2, fontsize=2)
 
-dcs = SVC(random_state=0)
-dcs.fit(X_train, y_train)
-SVC(random_state=0)
+# dcs = SVC(random_state=0)
+# dcs.fit(X_train, y_train)
+# SVC(random_state=0)
 # 3rd visual aide confusion matrix display
-ConfusionMatrixDisplay.from_estimator(dcs, X_test, y_test)
-plt.show()
+# ConfusionMatrixDisplay.from_estimator(dcs, X_test, y_test)
+# plt.show()
 
 # Assessment of model ranking test vs train data
 
@@ -591,9 +572,60 @@ print(u'SIMILAR/DISSIMILAR DOCS PER MODEL %s:\n' % model)
 for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2), ('LEAST', len(sims) - 1)]:
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
-# check here for product. If new product is launching and customer has bought in past. Send email
-# https://ppc-automation.medium.com/python-send-email-without-smtp-server-754f4782b7f6
+
+# with open (csv_test_file, 'rt) as f
+# mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
+# if st.find(b'jhdoe@email.com') != -1:
+
+
+#    print('true')
+#    data_frame = ['jhdoe@email.com']
+#   vector = vectorize.fit_transform(data_frame)
+#   update = vector.toarray()
+#  this = pd.DataFrame(update, columns=y_test)
+#  category = mnb.predict(this)
+
+#  print("this is category value:", category)
+#  print(
+#    "##################################################################################################")
+#   print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
+# print("\nrows of data for given email:", row)
+
 # def customer_product_check():
+def find_index(input):
+    o = open(csv_test_file, 'r')
+    my_data = csv.reader(o)
+    index = 0
+    for row in my_data:
+        # print row
+        if row[0] == input:
+            return index
+        else:
+            index += 1
+
+
+def check_for_email(email_input):
+    with open(csv_test_file, 'r+') as af:
+
+        line = af.readlines()
+        for row in line:
+
+            if email_input in row:
+                print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
+                print("\nrows of data for given email:", row)
+
+                #newshape = category.reshape(1, -1)
+                # merge with main df bridge_df on key values
+                df_email_input = [row]
+                # category = mnb.predict(np.array([email_input]).reshape(-1, 1))
+                # print(category)
+                predict_vector = vectorize.fit_transform(df_email_input)
+                enc = OneHotEncoder(handle_unknown='ignore')
+                category = pd.DataFrame(enc.fit_transform(predict_vector))
+                # cd_update = np.array(category).reshape(1, -1)
+                predict_this = mnb.predict(np.array(category))
+                print(predict_this)
+                # if email not in file-prompt +?ustomer to respond with email used to place order
 
 
 ###############################################################################
@@ -639,27 +671,20 @@ if __name__ == '__main__':
             email_input = input(" ")
             c2 = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input,))
             result = c2.fetchall()
-            print("##################################################################################################")
             print("Customer information for email address:", result)
             cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input,))
             results = cursor.fetchall()
-            print("##################################################################################################")
             print("Order information for selected email:", results)
+
+            check_for_email(email_input)
 
             # https://stackoverflow.com/questions/17308872/check-whether-string-is-in-csv
 
-            with open(csv_test_file, 'rt') as f:
-                reader = csv.reader(f, delimiter=',')
-                for row in reader:
-                    if 'jhdoe@email.com' in row:
-                        vector = vectorize.fit_transform(row)
-                        category_value = mnb.predict(vector)
-                        print("this is category value:", category_value)
-                        print(
-                            "##################################################################################################")
-                        print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
-                        print("\nrows of data for given email:", row)
-                        # if email not in file-prompt customer to respond with email used to place order
+            # doc_id3 = find_index(email_input)
+            # print(doc_id3)
+            # inferred_vectors = model.infer_vector(test_corpus[doc_id3].words)
+            # sim2 = model.dv.most_similar([inferred_vect], topn=len(model.dv))
+            # if email not in file-prompt customer to respond with email used to place order
         # option to exit
         elif option == '5':
             print("Please enter customer name")
