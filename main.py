@@ -42,11 +42,6 @@ logging.getLogger('googleapicliet.discovery_cache').setLevel(logging.ERROR)
 # if customer has not placed order recently
 # if customers have sent similar emails - send escalation email or notice out.
 
-
-print('this email here:')
-send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com", "hello from eric capstone", "test message 1",
-             user_id='me')
-
 # create sqllite sql database for future sensitive customer data live/practical application would have a separate
 # server for customer data
 # db corrupted somehow -renamed and recreated db file-
