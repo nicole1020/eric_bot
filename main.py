@@ -380,18 +380,6 @@ stop_words = stopwords.words("english")
 model = pickle.load(open(pickle_save, 'rb'))
 
 
-def emails_out_to_customers():
-    with open(csv_test_file, 'rt') as f:
-        reader = csv.reader(f, delimiter=',')
-        for row in reader:
-            if email_input in row:
-                print(
-                    "##################################################################################################")
-                print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
-                print("\nrows of data for given email:", row)
-                # if email not in file-prompt customer to respond with email used to place order
-
-
 # tokenizer - removes words less than 2 and ignores Xx
 def tokenizer(text):
     token = [word for word in word_tokenize(text) if
@@ -637,20 +625,21 @@ def response_to_email(email_input):
                                  f"The return once received will take approximately 2 days to process and 7 days to refund the funds to your original method of payment."
                                  f"We hope you have a great day and thank you for your support of SJC.",
                                  user_id='me')
-                if predict_this == 'debt_collection':
+                elif predict_this == 'debt_collection':
                     send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
-                                 "In regards to your previous email", f"Thank you,  {email_input} for contacting us {results}. please contact our billing department 555.555.5555")
-                if predict_this == 'credit_reporting':
+                                 "In regards to your previous email",
+                                 f"Thank you,  {email_input} for contacting us {results}. please contact our billing department 555.555.5555")
+                elif predict_this == 'credit_reporting':
                     send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
                                  "In regards to your previous email",
                                  f"Thank you,  {email_input} for contacting us {results}. Please contact your bank or the company of the credit card used at purchase")
 
-                if predict_this == 'mortgages_and_loans':
+                elif predict_this == 'mortgages_and_loans':
                     send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
                                  "In regards to your previous email",
                                  f"Thank you,  {email_input} for contacting us. We are unable to support mortgage issues. Please contact your bank.")
 
-                if predict_this == 'credit_card':
+                elif predict_this == 'credit_card':
                     send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
                                  "In regards to your previous email",
                                  f"Thank you,  {email_input} for contacting us {results}. Please contact your bank or the company of the credit card used at purchase")
@@ -661,6 +650,39 @@ def response_to_email(email_input):
                                  f"Thank you,  {email_input} for contacting us {results}. Please contact your bank or the company of the credit card used at purchase")
 
                     # if email not in file-prompt +?ustomer to respond with email used to place order
+
+
+def promotional_emails_out_to_customers(product_type_input):
+    with open(csv_test_file, 'r+') as af:
+        line = af.readlines()
+        for row in line:
+            if product_type_input in row:
+                # Please enter product type (earrings, ring, necklace, bracelet, brooch"
+                print(
+                    "##################################################################################################")
+                print("\nrows of data for given product:", row.count)
+                if product_type_input == 'earrings':
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "Here are earrings we thought you might like",
+                                 f"Thank you,  for your interest in the earrings. These earrings might also be of interest to you.")
+                elif product_type_input == 'ring':
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "Here's a ring we thought you might like",
+                                 f"Thank you,   for your interest in the ring. These rings might also be of interest to you.")
+                elif product_type_input == 'necklace':
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "Here's a necklace we thought you might like",
+                                 f"Thank you,  for your interest in the necklace. These necklace might also be of interest to you.")
+                elif product_type_input == 'bracelet':
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "Here's a bracelet we thought you might like",
+                                 f"Thank you,   for your interest in the bracelet. These bracelet might also be of interest to you.")
+                elif product_type_input == 'brooch':
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "Here's a brooch we thought you might like",
+                                 f"Thank you,   for your interest in the brooch. This brooch might also be of interest to you.")
+
+                # if email not in file-prompt customer to respond with email used to place order
 
 
 ###############################################################################
@@ -682,8 +704,9 @@ if __name__ == '__main__':
         print("3. Get all Customer Data")
         print("4. Get Specific Customer/order Information by email")
         print("5. Add New Customer")
-        print("6. Exit the Program")
-        option = input("Chose an option (1,2,3,4,5 or 6): ")
+        print("6. Send Marketing Emails by Product Type to existing customers")
+        print("7. Exit the Program")
+        option = input("Chose an option (1,2,3,4,5,6, or 7): ")
         # print all order data
         if option == "1":
             order_data()
@@ -732,6 +755,14 @@ if __name__ == '__main__':
             print("New Customer Added to database:", ', '.join(map(str, result)))
             customer_data()
         elif option == '6':
+            print("Please enter product type (earrings, ring, necklace, bracelet, brooch")
+            product_type_input = input("")
+
+            c3 = connect_database.execute("SELECT * from orders WHERE product=?", (product_type_input,))
+            result = c3.fetchall()
+            print(result)
+            promotional_emails_out_to_customers(product_type_input)
+        elif option == '7':
             isExit = False
         else:
             print("Invalid option, please try again!")
