@@ -611,7 +611,7 @@ complaints_dataframe = complaints_dataframe.join(enc_df)
 print(complaints_dataframe)
 
 
-def check_for_email(email_input):
+def response_to_email(email_input):
     with open(csv_test_file, 'r+') as af:
 
         line = af.readlines()
@@ -637,9 +637,30 @@ def check_for_email(email_input):
                                  f"The return once received will take approximately 2 days to process and 7 days to refund the funds to your original method of payment."
                                  f"We hope you have a great day and thank you for your support of SJC.",
                                  user_id='me')
+                if predict_this == 'debt_collection':
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "In regards to your previous email", f"Thank you,  {email_input} for contacting us {results}. please contact our billing department 555.555.5555")
+                if predict_this == 'credit_reporting':
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "In regards to your previous email",
+                                 f"Thank you,  {email_input} for contacting us {results}. Please contact your bank or the company of the credit card used at purchase")
+
+                if predict_this == 'mortgages_and_loans':
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "In regards to your previous email",
+                                 f"Thank you,  {email_input} for contacting us. We are unable to support mortgage issues. Please contact your bank.")
+
+                if predict_this == 'credit_card':
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "In regards to your previous email",
+                                 f"Thank you,  {email_input} for contacting us {results}. Please contact your bank or the company of the credit card used at purchase")
+
                 else:
-                    return 0
-                # if email not in file-prompt +?ustomer to respond with email used to place order
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "In regards to your previous email",
+                                 f"Thank you,  {email_input} for contacting us {results}. Please contact your bank or the company of the credit card used at purchase")
+
+                    # if email not in file-prompt +?ustomer to respond with email used to place order
 
 
 ###############################################################################
@@ -690,7 +711,7 @@ if __name__ == '__main__':
             results = cursor.fetchall()
             print("Order information for selected email:", ', '.join(map(str, results)))
 
-            check_for_email(email_input)
+            response_to_email(email_input)
 
             # https://stackoverflow.com/questions/17308872/check-whether-string-is-in-csv
 
@@ -709,6 +730,7 @@ if __name__ == '__main__':
             c3 = connect_database.execute("INSERT INTO customer (name, email) values (?,?)", (name_input, email_input))
             result = c3.fetchall()
             print("New Customer Added to database:", ', '.join(map(str, result)))
+            customer_data()
         elif option == '6':
             isExit = False
         else:
