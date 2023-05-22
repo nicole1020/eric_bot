@@ -621,29 +621,19 @@ def check_for_email(email_input):
 
         line = af.readlines()
         for row in line:
-            df_email_input = pd.read_csv(csv_test_file)
-            print(df_email_input)
-            predict_vector = vectorize.transform(df_email_input)
-            print(predict_vector)
-            predict_this = mnb.predict(predict_vector)
-            print('this is predict this ', predict_this)
             if email_input in row:
                 print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
                 print("\nrows of data for given email:", row)
-                df_email_input = pd.read_csv(csv_test_file)
-                # category = mnb.predict(np.array([email_input]).reshape(-1, 1))
-                # print(category)
-                print(df_email_input)
-                predict_vector = vectorize.transform(df_email_input)
-                print(predict_vector)
-                p_to_array = predict_vector.toarray()
-                categs = pd.DataFrame(enc.fit_transform(p_to_array))
-                print(categs)
-                cat_up = xarray.Dataset(categs)
-                category = cat_up.to_array()
-                print(category.shape)
-                predict_this = mnb.predict(predict_vector)
-                print('this is predict this ', predict_this)
+                predict_ve = vectorize.transform([row])
+                print(predict_ve)
+                # p_to_array = predict_vector.toarray()
+                # categs = pd.DataFrame(enc.fit_transform(p_to_array))
+                # print(categs)
+                # cat_up = xarray.Dataset(categs)
+                # category = cat_up.to_array()
+                # print(category.shape)
+                predict_th = mnb.predict(predict_ve)
+                print('this is predict row ', predict_th)
                 # newshape = category.reshape(1, -1)
                 # merge with main df bridge_df on key values
 
@@ -679,9 +669,9 @@ if __name__ == '__main__':
         elif option == "2":
             print("Please enter your order ID")
             orderID = input(" ")
-            cursor = connect_database.execute("SELECT * FROM ORDERS where id = ?", (orderID,))
+            cursor = connect_database.execute("SELECT * FROM ORDERS where id = ?", (orderID, ))
             results = cursor.fetchall()
-            print(results)
+            print(', '.join(map(str, results)))
 
         # print all customer data
         elif option == "3":
@@ -691,12 +681,12 @@ if __name__ == '__main__':
         elif option == "4":
             print("Please enter customer email")
             email_input = input(" ")
-            c2 = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input,))
+            c2 = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input, ))
             result = c2.fetchall()
-            print("Customer information for email address:", result)
-            cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input,))
+            print("Customer information for email address:", ', '.join(map(str, result)))
+            cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input, ))
             results = cursor.fetchall()
-            print("Order information for selected email:", results)
+            print("Order information for selected email:", ', '.join(map(str, results)))
 
             check_for_email(email_input)
 
@@ -716,7 +706,7 @@ if __name__ == '__main__':
 
             c3 = connect_database.execute("INSERT INTO customer (name, email) values (?,?)", (name_input, email_input))
             result = c3.fetchall()
-            print("New Customer Added to database:", result)
+            print("New Customer Added to database:", ', '.join(map(str, result)))
         elif option == '6':
             isExit = False
         else:
