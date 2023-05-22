@@ -606,9 +606,9 @@ def find_index(input):
 enc = OneHotEncoder(handle_unknown='ignore')
 # creating instance of one-hot-encoder
 
-# passing bridge-types-cat column (label encoded values of bridge_types)
+# passing ['search_terms'] column (label encoded values of ['search_terms']s)
 enc_df = pd.DataFrame(enc.fit_transform(complaints_dataframe[['search_terms']]).toarray())
-# merge with main df bridge_df on key values
+# merge with main df complaints_dataframe on key values
 complaints_dataframe = complaints_dataframe.join(enc_df)
 
 
@@ -630,8 +630,10 @@ def check_for_email(email_input):
                 predict_vector = vectorize.fit_transform(df_email_input)
                 p_to_array = predict_vector.toarray()
                 category = pd.DataFrame(enc.fit_transform(p_to_array))
-                cd_update = category.to_xarray()
-                predict_this = mnb.predict(cd_update.todense())
+                cat_up = category.to_xarray()
+                cat = cat_up.to_array()
+
+                predict_this = mnb.predict(cat)
                 print(predict_this)
                 # if email not in file-prompt +?ustomer to respond with email used to place order
 
