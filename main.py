@@ -8,6 +8,7 @@ from datetime import timedelta
 import sklearn
 import smart_open
 import vectorize as vectorize
+import xarray
 from imblearn.over_sampling import SMOTE
 from sklearn import metrics, tree
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -629,12 +630,12 @@ def check_for_email(email_input):
                 # print(category)
                 predict_vector = vectorize.fit_transform(df_email_input)
                 p_to_array = predict_vector.toarray()
-                cat = pd.DataFrame(enc.fit_transform(p_to_array))
-                p_to_array = p_to_array.join(cat)
-                #cat_up = category.to_xarray()
-                #cat = cat_up.to_array()
+                categs = pd.DataFrame(enc.fit_transform(p_to_array))
 
-                predict_this = mnb.predict(p_to_array)
+                cat_up = xarray.Dataset
+                cat = categs.to_xarray()
+                print(cat_up)
+                predict_this = mnb.predict(cat.to_array())
                 print(predict_this)
                 # if email not in file-prompt +?ustomer to respond with email used to place order
 
