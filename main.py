@@ -613,6 +613,8 @@ enc_df = pd.DataFrame(enc.fit_transform(complaints_dataframe[['search_terms']]).
 # merge with main df complaints_dataframe on key values
 complaints_dataframe = complaints_dataframe.join(enc_df)
 
+print(complaints_dataframe)
+
 
 def check_for_email(email_input):
     with open(csv_test_file, 'r+') as af:
@@ -623,16 +625,16 @@ def check_for_email(email_input):
             # category = mnb.predict(np.array([email_input]).reshape(-1, 1))
             # print(category)
             print(df_email_input)
-            predict_vector = vectorize.fit_transform(df_email_input)
+            predict_vector = vectorize.transform(df_email_input)
             print(predict_vector)
             p_to_array = predict_vector.toarray()
-            print(p_to_array)
             categs = pd.DataFrame(enc.fit_transform(p_to_array))
             print(categs)
             cat_up = xarray.Dataset(categs)
             category = cat_up.to_array()
-            predict_this = mnb.predict(category)
-            print(predict_this)
+            print(category.shape)
+            predict_this = mnb.predict(predict_vector)
+            print('this is predict this ', predict_this)
             if email_input in row:
                 print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
                 print("\nrows of data for given email:", row)
