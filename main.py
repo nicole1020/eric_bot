@@ -623,9 +623,19 @@ def check_for_email(email_input):
                 print(predict_vec)
                 predict_this = mnb.predict(predict_vec)
                 print('this is predict row ', predict_this)
+                cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input,))
+                results = cursor.fetchall()
+                print("Order information for selected email:", ', '.join(map(str, results)))
+                # eventually these caategories will be returns, repair, resize, exchanges, credit card, escalation, and so on
                 if predict_this == 'retail_banking':
                     send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
-                                 "hello from eric capstone", "test message 1",
+                                 "In regards to your previous email",
+                                 f"Thank you,  {email_input} for contacting us. Your order status is {results}. "
+                                 f"To initiate a return please use the package return label included in your purchase box. "
+                                 f"Please include the original item and packing slip inside and affix the shipping label to the outside of the box."
+                                 f"Please take the package to the nearest UPS at your earliest convenience. "
+                                 f"The return once received will take approximately 2 days to process and 7 days to refund the funds to your original method of payment."
+                                 f"We hope you have a great day and thank you for your support of SJC.",
                                  user_id='me')
                 else:
                     return 0
@@ -661,7 +671,7 @@ if __name__ == '__main__':
         elif option == "2":
             print("Please enter your order ID")
             orderID = input(" ")
-            cursor = connect_database.execute("SELECT * FROM ORDERS where id = ?", (orderID, ))
+            cursor = connect_database.execute("SELECT * FROM ORDERS where id = ?", (orderID,))
             results = cursor.fetchall()
             print(', '.join(map(str, results)))
 
@@ -673,10 +683,10 @@ if __name__ == '__main__':
         elif option == "4":
             print("Please enter customer email")
             email_input = input(" ")
-            c2 = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input, ))
+            c2 = connect_database.execute("SELECT * FROM CUSTOMER where email = ? ", (email_input,))
             result = c2.fetchall()
             print("Customer information for email address:", ', '.join(map(str, result)))
-            cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input, ))
+            cursor = connect_database.execute("SELECT * FROM ORDERS where email = ? ", (email_input,))
             results = cursor.fetchall()
             print("Order information for selected email:", ', '.join(map(str, results)))
 
