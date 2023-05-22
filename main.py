@@ -411,7 +411,8 @@ vectorize = TfidfVectorizer(analyzer=tokenizer)
 
 # sets narrative to tfidf vectorizer
 x_for = vectorize.fit_transform(df['narrative'][:1000].values.astype('U'))
-print(complaints_dataframe.head(10))
+print("this is xfor-", x_for)
+
 print(complaints_dataframe.info(verbose=True))
 # expand column size
 pd.set_option('display.max_colwidth', None)
@@ -618,25 +619,27 @@ def check_for_email(email_input):
 
         line = af.readlines()
         for row in line:
-
+            df_email_input = pd.read_csv(csv_test_file)
+            # category = mnb.predict(np.array([email_input]).reshape(-1, 1))
+            # print(category)
+            print(df_email_input)
+            predict_vector = vectorize.fit_transform(df_email_input)
+            print(predict_vector)
+            p_to_array = predict_vector.toarray()
+            print(p_to_array)
+            categs = pd.DataFrame(enc.fit_transform(p_to_array))
+            print(categs)
+            cat_up = xarray.Dataset(categs)
+            category = cat_up.to_array()
+            predict_this = mnb.predict(category)
+            print(predict_this)
             if email_input in row:
                 print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
                 print("\nrows of data for given email:", row)
 
                 # newshape = category.reshape(1, -1)
                 # merge with main df bridge_df on key values
-                df_email_input = [row[:]]
-                # category = mnb.predict(np.array([email_input]).reshape(-1, 1))
-                # print(category)
-                predict_vector = vectorize.fit_transform(df_email_input)
-                p_to_array = predict_vector.toarray()
-                categs = pd.DataFrame(enc.fit_transform(p_to_array))
 
-                cat_up = xarray.Dataset
-                cat = categs.to_xarray()
-                print(cat_up)
-                predict_this = mnb.predict(cat.to_array())
-                print(predict_this)
                 # if email not in file-prompt +?ustomer to respond with email used to place order
 
 
