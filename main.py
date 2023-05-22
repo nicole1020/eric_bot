@@ -152,7 +152,7 @@ def update_table_rows():
 # -api
 def customer_data():
     try:
-        select_all_table = "SELECT * FROM customer"
+        select_all_table = "SELECT * FROM customer "
         cursor = connect_database.execute(select_all_table)
         results = cursor.fetchall()
         print(results)
