@@ -624,19 +624,16 @@ def check_for_email(email_input):
             if email_input in row:
                 print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
                 print("\nrows of data for given email:", row)
-                predict_ve = vectorize.transform([row])
-                print(predict_ve)
-                # p_to_array = predict_vector.toarray()
-                # categs = pd.DataFrame(enc.fit_transform(p_to_array))
-                # print(categs)
-                # cat_up = xarray.Dataset(categs)
-                # category = cat_up.to_array()
-                # print(category.shape)
-                predict_th = mnb.predict(predict_ve)
-                print('this is predict row ', predict_th)
-                # newshape = category.reshape(1, -1)
-                # merge with main df bridge_df on key values
-
+                predict_vec = vectorize.transform([row])
+                print(predict_vec)
+                predict_this = mnb.predict(predict_vec)
+                print('this is predict row ', predict_this)
+                if predict_this == 'retail_banking':
+                    send_message("eric.capstone.api@gmail.com", "eric.capstone.api@gmail.com",
+                                 "hello from eric capstone", "test message 1",
+                                 user_id='me')
+                else:
+                    return 0
                 # if email not in file-prompt +?ustomer to respond with email used to place order
 
 
