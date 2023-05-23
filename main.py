@@ -45,7 +45,7 @@ logging.getLogger('googleapicliet.discovery_cache').setLevel(logging.ERROR)
 # create sqllite sql database for future sensitive customer data live/practical application would have a separate
 # server for customer data
 # db corrupted somehow -renamed and recreated db file-
-connect_database = sql.connect('my_test_db.db')
+connect_database = sql.connect('my_db_for_capstone.db')
 
 
 ###############################################################################
@@ -61,7 +61,7 @@ connect_database = sql.connect('my_test_db.db')
 
 def clear_customer_data():
     try:
-        delete_all = "DROP TABLE CUSTOMER"
+        delete_all = "DROP TABLE customer"
         connect_database.execute(delete_all)
     except ValueError as e:
         print('An error occurred: %s' % e)
@@ -72,13 +72,73 @@ def clear_customer_data():
 
 def clear_order_data():
     try:
-        delete_all = "DELETE FROM ORDERS WHERE id IN (11, 12, 13, 14, 15, 16 ,17, 18,19);"
+        delete_all = "DROP TABLE orders;"
         connect_database.execute(delete_all)
     except ValueError as e:
         print('An error occurred: %s' % e)
 
 
 # clear_order_data()
+
+
+###############################################################################
+def create_inventory_data():
+    try:
+        connect_database.execute(''' 
+        CREATE TABLE IF NOT EXISTS inventory ( 
+        id INTEGER  PRIMARY KEY AUTOINCREMENT,
+               product TEXT,
+              quantity INTEGER )
+      ''')
+    except ValueError as e:
+        print('An error occurred: %s' % e)
+
+
+create_inventory_data()
+
+
+def add_inventory_data():
+    try:
+        sql = 'INSERT INTO inventory(product, quantity) values(?,?)'
+        inventory_table = [('ring', 50),
+                           ('brooch', 25),
+                           ('earrings', 5),
+                           ('bracelet', 10),
+                           ('necklace', 1000),
+
+                           ]
+        connect_database.executemany(sql, inventory_table)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
+
+
+#add_inventory_data()
+
+def inventory_data():
+    try:
+        select_all_table = "SELECT * FROM inventory "
+        cursor = connect_database.execute(select_all_table)
+        results = cursor.fetchall()
+        print(results)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
+
+
+print('inventory database:')
+inventory_data()
+
+
+def drop_view():
+    try:
+        drop = "DROP VIEW IF EXISTS remaining_view "
+        cursor = connect_database.execute(drop)
+        results = cursor.fetchall()
+        print(results)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
+
+
+#drop_view()
 
 
 ###############################################################################
@@ -94,10 +154,7 @@ def create_customer_table():
     except ValueError as e:
         print('An error occurred: %s' % e)
 
-
 create_customer_table()
-
-
 def add_customer_data():
     try:
         sql = 'INSERT INTO customer(name, email) values(?,?)'
@@ -109,7 +166,8 @@ def add_customer_data():
                           ('Katsu Dog', 'kdog@email.com'),
                           ('M Niece', 'mniece@email.com'),
                           ('A Child', 'achild@email.com'),
-                          ('Mochi Dog', 'mdog@email.com')
+                          ('Mochi Dog', 'mdog@email.com'),
+                          ('Nicole Mau', 'nmau@wgu.edu')
                           ]
         connect_database.executemany(sql, customer_table)
     except ValueError as e:
@@ -171,7 +229,8 @@ def create_order_table():
                     status TEXT,
                   email TEXT,
                  notes TEXT,
-                 product TEXT
+                 product TEXT,
+                 orderqty INTEGER
                 )
           ''')
     except ValueError as e:
@@ -185,7 +244,7 @@ create_order_table()
 
 def add_column_order():
     try:
-        connect_database.execute("ALTER TABLE orders ADD product TEXT")
+        connect_database.execute("ALTER TABLE orders ADD orderqty INTEGER")
     except ValueError as e:
         print('An error occurred: %s' % e)
 
@@ -196,16 +255,16 @@ def add_column_order():
 # use this to update OR add new customer specific ones can add later with UI
 def add_order_data():
     try:
-        sql = 'INSERT INTO orders( status, email, notes, product) values(?,?,?,?)'
-        updated_order_table = [('en-route', 'jdoe@email.com', 'cc', 'earrings'),
-                               ('pending', 'jhdoe@email.com', 'cc', 'ring'),
-                               ('at hub', 'jdoe@email.com', 'wire', 'necklace'),
-                               ('pending', 'jdoe@email.com', 'cc', 'bracelet'),
-                               ('delayed', 'jdoe@email.com', 'cc', 'ring'),
-                               ('delivered', 'kdog@email.com', 'cc', 'brooch'),
-                               ('delivered', 'mniece@email.com', 'cc', 'necklace'),
-                               ('delivered', 'achild@email.com', 'cc', 'ring'),
-                               ('delivered', 'mdog@email.com', 'cc', 'ring')
+        sql = 'INSERT INTO orders( status, email, notes, product, orderqty) values(?,?,?,?,?)'
+        updated_order_table = [('en-route', 'jdoe@email.com', 'cc', 'earrings', 1),
+                               ('pending', 'jhdoe@email.com', 'cc', 'ring', 1),
+                               ('at hub', 'jdoe@email.com', 'wire', 'necklace', 1),
+                               ('pending', 'jdoe@email.com', 'cc', 'bracelet', 1),
+                               ('delayed', 'jdoe@email.com', 'cc', 'ring', 1),
+                               ('delivered', 'kdog@email.com', 'cc', 'brooch', 1),
+                               ('delivered', 'mniece@email.com', 'cc', 'necklace', 1),
+                               ('delivered', 'achild@email.com', 'cc', 'ring', 1),
+                               ('delivered', 'mdog@email.com', 'cc', 'ring', 1)
                                ]
 
         connect_database.executemany(sql, updated_order_table)
@@ -214,6 +273,7 @@ def add_order_data():
 
 
 # add_order_data()
+
 
 # printing all orders
 def order_data():
@@ -265,8 +325,14 @@ def delete_extra_entries():
     except ValueError as e:
         print('An error occurred: %s' % e)
 
-
 # delete_extra_entries()
+
+
+# attempted to add a view to track inventory changes as orders are placed but it pushed the limits of sqllite. For this simulation
+# it will have to wait for practical application to be able to auto order as inventory decreases.
+#####################################################################################
+
+
 
 # db commit
 connect_database.commit()
@@ -393,7 +459,7 @@ def tokenizer(text):
 vectorize = TfidfVectorizer(analyzer=tokenizer)
 
 # sets narrative to tfidf vectorizer
-x_for = vectorize.fit_transform(df['narrative'][:1000].values.astype('U'))
+x_for = vectorize.fit_transform(df['narrative'][:10000].values.astype('U'))
 print("this is xfor-", x_for)
 
 print(complaints_dataframe.info(verbose=True))
@@ -401,7 +467,7 @@ print(complaints_dataframe.info(verbose=True))
 pd.set_option('display.max_colwidth', None)
 
 # use SMOTE for irregularly shaped data types
-x_sm, y_sm = SMOTE().fit_resample(x_for, df['product'][:1000])
+x_sm, y_sm = SMOTE().fit_resample(x_for, df['product'][:10000])
 
 # initialize x and y train and test
 X_train, X_test, y_train, y_test = train_test_split(x_sm, y_sm, test_size=0.3, random_state=0)
@@ -750,12 +816,13 @@ if __name__ == '__main__':
             print("Please enter customer email")
             email_input = input(" ")
 
-            c3 = connect_database.execute("INSERT INTO customer (name, email) values (?,?)", (name_input, email_input))
+            c3 = connect_database.execute("INSERT OR REPLACE INTO customer (name, email) values (?,?)",
+                                          (name_input, email_input))
             result = c3.fetchall()
             print("New Customer Added to database:", ', '.join(map(str, result)))
             customer_data()
         elif option == '6':
-            print("Please enter product type (earrings, ring, necklace, bracelet, brooch")
+            print("Please enter product type (earrings, ring, necklace, bracelet, brooch)")
             product_type_input = input("")
 
             c3 = connect_database.execute("SELECT * from orders WHERE product=?", (product_type_input,))
@@ -763,6 +830,8 @@ if __name__ == '__main__':
             print(result)
             promotional_emails_out_to_customers(product_type_input)
         elif option == '7':
+            inventory_data()
+        elif option == '8':
             isExit = False
         else:
             print("Invalid option, please try again!")
