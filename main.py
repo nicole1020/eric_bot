@@ -1,37 +1,30 @@
 """Computer Science Capstone C964 | Nicole Mau | nmau@wgu.edu | 001336361 | eric_bot | email response in corporations"""
+import collections
 import csv
 import logging
-import mmap
+import os
 import pickle
-from datetime import timedelta
+import random
+import sqlite3 as sql
 
-import sklearn
+import gensim
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import smart_open
 import vectorize as vectorize
-import xarray
 from imblearn.over_sampling import SMOTE
+from nltk import word_tokenize, SnowballStemmer
+from nltk.corpus import stopwords
 from sklearn import metrics, tree
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-
-import os
-import gensim
-import numpy as np
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-from nltk import word_tokenize, SnowballStemmer
-from nltk.corpus import stopwords
-from sklearn.naive_bayes import MultinomialNB
-import sqlite3 as sql
-from sklearn.metrics import classification_report
-import collections
-import random
-from tkinter import *
-import tkinter.ttk as ttk
 
 from email_helper import send_message
 
