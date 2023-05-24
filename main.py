@@ -112,7 +112,7 @@ def add_inventory_data():
         print('An error occurred: %s' % e)
 
 
-#add_inventory_data()
+# add_inventory_data()
 
 def inventory_data():
     try:
@@ -138,7 +138,7 @@ def drop_view():
         print('An error occurred: %s' % e)
 
 
-#drop_view()
+# drop_view()
 
 
 ###############################################################################
@@ -154,7 +154,10 @@ def create_customer_table():
     except ValueError as e:
         print('An error occurred: %s' % e)
 
+
 create_customer_table()
+
+
 def add_customer_data():
     try:
         sql = 'INSERT INTO customer(name, email) values(?,?)'
@@ -325,13 +328,13 @@ def delete_extra_entries():
     except ValueError as e:
         print('An error occurred: %s' % e)
 
+
 # delete_extra_entries()
 
 
 # attempted to add a view to track inventory changes as orders are placed but it pushed the limits of sqllite. For this simulation
 # it will have to wait for practical application to be able to auto order as inventory decreases.
 #####################################################################################
-
 
 
 # db commit
@@ -353,9 +356,6 @@ csv_test_file = os.path.join(test_data_dir, 'emails from Seattle Jewelry Company
 
 # cleaned data for naiive bayes and doc2vec analysis
 csv_tmp_file = os.path.join(test_data_dir, 'data_part_.csv')
-
-# test emails i created that represent the majority of incoming customer communications
-csv_test_result = os.path.join(test_data_dir, 'SJCompany.csv')
 
 # test emails i created that represent the majority of outgoing customer communications
 csv_response = os.path.join(test_data_dir, 'SJCCompanyOutgoingEmails.csv')
@@ -417,10 +417,10 @@ df.dropna(inplace=True)
 df['product'].value_counts().plot(kind='bar')
 
 # bar plot labels and label orientation fixed (visual #1)
-# plt.bar(x='product', height=3.0, width=3.0)
+plt.bar(x='product', height=3.0, width=3.0)
 plt.xticks(rotation=10)
 plt.title('Email Description Counts')
-# plt.show()
+plt.show()
 
 # initialized dataframe complaints_dataframe for analysis by ML algorithms
 complaints_dataframe = df[['product', 'narrative']]
@@ -460,7 +460,6 @@ vectorize = TfidfVectorizer(analyzer=tokenizer)
 
 # sets narrative to tfidf vectorizer
 x_for = vectorize.fit_transform(df['narrative'][:10000].values.astype('U'))
-print("this is xfor-", x_for)
 
 print(complaints_dataframe.info(verbose=True))
 # expand column size
@@ -493,7 +492,7 @@ X_test_predict = mnb.predict(X_test)
 X_pred = mnb.predict(x_for)
 
 # check classification
-# print(classification_report(y_test, X_test_predict))
+print(classification_report(y_test, X_test_predict))
 
 # check accuracy
 print('MNB accuracy score: ', mnb.score(X_train, y_train))
@@ -548,34 +547,35 @@ print(f"Word 'jewelry' appeared {model.wv.get_vecattr('jewelry', 'count')} times
 ###############################################################################
 # check trained model for terms as vectors
 
-# list_of_terms = ['jewelry', 'pearls', 'necklace', 'earrings', 'gemstone']
+list_of_terms = ['jewelry', 'pearls', 'necklace', 'earrings', 'gemstone']
 # introductory- will expand terms in real life data with 'order status', 'exchange', 'return', 'refund'
-# vector = model.infer_vector(list_of_terms)
-# print(list_of_terms)
-# print(vector)
+vector = model.infer_vector(list_of_terms)
+print(list_of_terms)
+print(vector)
 
 # pickle save model
 # pickle.dump(model, open(pickle_save, 'wb'))
 
 # 2nd visual aide, Decision tree classifier
-# dc = DecisionTreeClassifier()
-# dc1 = dc.fit(X_train, y_train)
-# y_predict = dc.predict(X_test)
+dc = DecisionTreeClassifier()
+dc1 = dc.fit(X_train, y_train)
+y_predict = dc.predict(X_test)
 
 # check accuracy of decision tree
-# print("Decision Tree Classifier Accuracy check:", metrics.accuracy_score(y_test, y_predict))
+print("Decision Tree Classifier Accuracy check:", metrics.accuracy_score(y_test, y_predict))
 
 # added tree plot and confusion matrix for display
-# dc2 = tree.DecisionTreeClassifier(random_state=0)
-# dcs2 = dc2.fit(X_train, y_train)
-# tree.plot_tree(dcs2, fontsize=2)
+dc2 = tree.DecisionTreeClassifier(random_state=0)
+dcs2 = dc2.fit(X_train, y_train)
+tree.plot_tree(dcs2, fontsize=2)
 
-# dcs = SVC(random_state=0)
-# dcs.fit(X_train, y_train)
-# SVC(random_state=0)
+dcs = SVC(random_state=0)
+dcs.fit(X_train, y_train)
+
 # 3rd visual aide confusion matrix display
-# ConfusionMatrixDisplay.from_estimator(dcs, X_test, y_test)
-# plt.show()
+ConfusionMatrixDisplay.from_estimator(dcs, X_test, y_test)
+plt.show()
+
 
 # Assessment of model ranking test vs train data
 
@@ -623,25 +623,6 @@ for label, index in [('MOST', 0), ('SECOND-MOST', 1), ('MEDIAN', len(sims) // 2)
     print(u'%s %s: «%s»\n' % (label, sims[index], ' '.join(train_corpus[sims[index][0]].words)))
 
 
-# with open (csv_test_file, 'rt) as f
-# mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
-# if st.find(b'jhdoe@email.com') != -1:
-
-
-#    print('true')
-#    data_frame = ['jhdoe@email.com']
-#   vector = vectorize.fit_transform(data_frame)
-#   update = vector.toarray()
-#  this = pd.DataFrame(update, columns=y_test)
-#  category = mnb.predict(this)
-
-#  print("this is category value:", category)
-#  print(
-#    "##################################################################################################")
-#   print("\nEmail exists in 'emails from Seattle Jewelry Company.csv' file")
-# print("\nrows of data for given email:", row)
-
-# def customer_product_check():
 def find_index(input):
     o = open(csv_test_file, 'r')
     my_data = csv.reader(o)
@@ -771,8 +752,9 @@ if __name__ == '__main__':
         print("4. Get Specific Customer/order Information by email")
         print("5. Add New Customer")
         print("6. Send Marketing Emails by Product Type to existing customers")
-        print("7. Exit the Program")
-        option = input("Chose an option (1,2,3,4,5,6, or 7): ")
+        print("7. Inventory Data")
+        print("8. Exit the Program")
+        option = input("Chose an option (1,2,3,4,5,6,7, or 8): ")
         # print all order data
         if option == "1":
             order_data()
@@ -828,8 +810,13 @@ if __name__ == '__main__':
             c3 = connect_database.execute("SELECT * from orders WHERE product=?", (product_type_input,))
             result = c3.fetchall()
             print(result)
+
             promotional_emails_out_to_customers(product_type_input)
         elif option == '7':
+            c4 = connect_database.execute("SELECT * from inventory WHERE ifnull(quantity, '') = ''")
+            result2 = c4.fetchall()
+            print("current inventory levels ", inventory_data())
+            print("low inventory", result2)
             inventory_data()
         elif option == '8':
             isExit = False
