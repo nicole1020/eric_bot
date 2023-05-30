@@ -73,12 +73,41 @@ def clear_order_data():
 
 # clear_order_data()
 
+###############################################################################
+def create_part_data():
+    try:
+        connect_database.execute(''' 
+        CREATE TABLE IF NOT EXISTS parts ( 
+        id INTEGER  PRIMARY KEY AUTOINCREMENT,
+               part TEXT,
+              quantity INTEGER )
+      ''')
+    except ValueError as e:
+        print('An error occurred: %s' % e)
+
+
+create_part_data()
+
+###############################################################################
+def create_associatedparts_data():
+    try:
+        connect_database.execute(''' 
+        CREATE TABLE IF NOT EXISTS parts ( 
+        id INTEGER  PRIMARY KEY AUTOINCREMENT,
+               part name,
+              quantity INTEGER )
+      ''')
+    except ValueError as e:
+        print('An error occurred: %s' % e)
+
+
+create_associatedparts_data()
 
 ###############################################################################
 def create_inventory_data():
     try:
         connect_database.execute(''' 
-        CREATE TABLE IF NOT EXISTS inventory ( 
+        CREATE TABLE IF NOT EXISTS products ( 
         id INTEGER  PRIMARY KEY AUTOINCREMENT,
                product TEXT,
               quantity INTEGER )
@@ -87,29 +116,39 @@ def create_inventory_data():
         print('An error occurred: %s' % e)
 
 
-create_inventory_data()
+#create_inventory_data()
 
-
-def add_inventory_data():
+def alter_products_data():
     try:
-        sql = 'INSERT INTO inventory(product, quantity) values(?,?)'
-        inventory_table = [('ring', 50),
+        connect_database.execute(''' 
+        ALTER TABLE inventory RENAME TO products 
+      ''')
+    except ValueError as e:
+        print('An error occurred: %s' % e)
+
+
+# alter_products_data()
+
+def add_products_data():
+    try:
+        sql = 'INSERT INTO products(product, quantity) values(?,?)'
+        products_data = [('ring', 50),
                            ('brooch', 25),
                            ('earrings', 5),
                            ('bracelet', 10),
                            ('necklace', 1000),
 
                            ]
-        connect_database.executemany(sql, inventory_table)
+        connect_database.executemany(sql, products_data)
     except ValueError as e:
         print('An error occurred: %s' % e)
 
 
-# add_inventory_data()
+# add_products_data()
 
-def inventory_data():
+def products_data():
     try:
-        select_all_table = "SELECT * FROM inventory "
+        select_all_table = "SELECT * FROM products "
         cursor = connect_database.execute(select_all_table)
         results = cursor.fetchall()
         print(results)
@@ -117,8 +156,8 @@ def inventory_data():
         print('An error occurred: %s' % e)
 
 
-print('inventory database:')
-inventory_data()
+print('Products database:')
+products_data()
 
 
 def drop_view():
@@ -236,11 +275,11 @@ def create_order_table():
 create_order_table()
 
 
-# added column to table order
+# added column to table inventory
 
 def add_column_order():
     try:
-        connect_database.execute("ALTER TABLE orders ADD orderqty INTEGER")
+        connect_database.execute("ALTER TABLE products ADD part1 INTEGER, part2 INTEGER, part 3 INTEGER")
     except ValueError as e:
         print('An error occurred: %s' % e)
 
@@ -745,7 +784,7 @@ if __name__ == '__main__':
         print("4. Get Specific Customer/order Information by email")
         print("5. Add New Customer")
         print("6. Send Marketing Emails by Product Type to existing customers")
-        print("7. Inventory Data")
+        print("7. Products Data")
         print("8. Exit the Program")
         option = input("Chose an option (1,2,3,4,5,6,7, or 8): ")
         # print all order data
@@ -806,11 +845,11 @@ if __name__ == '__main__':
 
             promotional_emails_out_to_customers(product_type_input)
         elif option == '7':
-            c4 = connect_database.execute("SELECT * from inventory WHERE ifnull(quantity, '') = ''")
+            c4 = connect_database.execute("SELECT * from products WHERE ifnull(quantity, '') = ''")
             result2 = c4.fetchall()
-            print("current inventory levels ", inventory_data())
-            print("low inventory", result2)
-            inventory_data()
+            print("current product inventory levels ", products_data())
+            print("low inventory of these products", result2)
+            products_data()
         elif option == '8':
             isExit = False
         else:
