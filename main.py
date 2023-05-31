@@ -88,6 +88,7 @@ def create_part_data():
 
 create_part_data()
 
+
 ###############################################################################
 def create_associatedparts_data():
     try:
@@ -103,8 +104,32 @@ def create_associatedparts_data():
 
 create_associatedparts_data()
 
+
+def add_parts_data():
+    try:
+        sql = 'INSERT INTO parts(part, quantity) values(?,?)'
+        parts_data = [('ring head', 50),
+                      ('diamond', 25),
+                      ('yellow gold ring', 25),
+                      ('white gold ring', 25),
+                      ('platinum ring', 25),
+                      ('earring posts', 5),
+                      ('earring backs', 5),
+                      ('bracelet', 10),
+                      ('clasps', 10),
+                      ('necklace', 1000),
+
+                      ]
+        connect_database.executemany(sql, parts_data)
+    except ValueError as e:
+        print('An error occurred: %s' % e)
+
+
+#add_parts_data()
+
+
 ###############################################################################
-def create_inventory_data():
+def create_products_data():
     try:
         connect_database.execute(''' 
         CREATE TABLE IF NOT EXISTS products ( 
@@ -116,7 +141,7 @@ def create_inventory_data():
         print('An error occurred: %s' % e)
 
 
-#create_inventory_data()
+# create_products_data()
 
 def alter_products_data():
     try:
@@ -133,12 +158,12 @@ def add_products_data():
     try:
         sql = 'INSERT INTO products(product, quantity) values(?,?)'
         products_data = [('ring', 50),
-                           ('brooch', 25),
-                           ('earrings', 5),
-                           ('bracelet', 10),
-                           ('necklace', 1000),
+                         ('brooch', 25),
+                         ('earrings', 5),
+                         ('bracelet', 10),
+                         ('necklace', 1000),
 
-                           ]
+                         ]
         connect_database.executemany(sql, products_data)
     except ValueError as e:
         print('An error occurred: %s' % e)
@@ -607,7 +632,6 @@ dcs.fit(X_train, y_train)
 # 3rd visual aide confusion matrix display
 ConfusionMatrixDisplay.from_estimator(dcs, X_test, y_test)
 plt.show()
-
 
 # Assessment of model ranking test vs train data
 
