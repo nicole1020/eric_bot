@@ -28,7 +28,7 @@ scipy 1.10.1
 
 seaborn 0.12.2
 
-dataset for testing: https://www.kaggle.com/datasets/shashwatwork/consume-complaints-dataset-fo-nlp
+dataset: https://www.kaggle.com/datasets/shashwatwork/consume-complaints-dataset-fo-nlp
 
 
 User Guide
